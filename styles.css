@@ -115,11 +115,11 @@ input:focus, select:focus {
 
 /* Category list */
 #category-list {
-    @apply divide-y divide-gray-200;
+    @apply max-h-64 overflow-y-auto border border-gray-200 rounded-lg;
 }
 
 #category-list button {
-    @apply w-full text-left p-3 border-b border-gray-200 bg-none cursor-pointer transition-colors duration-200 ease-in-out text-sm;
+    @apply block w-full text-left p-3 border-b border-gray-200 bg-none cursor-pointer transition-colors duration-200 ease-in-out text-sm;
     white-space: nowrap; /* Prevent text wrapping */
     overflow: hidden;
     text-overflow: ellipsis;
