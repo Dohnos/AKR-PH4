@@ -44,20 +44,21 @@ fetch("MapaKat.txt")
     })
     .catch(error => console.error("Chyba při načítání kategorií:", error));
 
+// Funkce pro aktualizaci statusu
 function updateStatus(message) {
     status.textContent = message;
-    updateProductCountToday();
 }
 
-// Funkce pro zobrazení počtu produktů přidaných dnes
-function updateProductCountToday() {
+// Funkce pro aktualizaci počtu produktů přidaných dnes
+function updateTodayProductCount() {
     const today = new Date().toISOString().split("T")[0]; // Dnešní datum ve formátu YYYY-MM-DD
     const products = JSON.parse(localStorage.getItem("products")) || [];
     const todayProducts = products.filter(product => {
-        const productDate = new Date(product.startingAt).toISOString().split("T")[0];
-        return productDate === today;
+        if (!product.createdAt) return false;
+        return product.createdAt.split("T")[0] === today;
     });
-    document.getElementById("product-count-today").textContent = `Produktů přidáno dnes: ${todayProducts.length}`;
+    const countDiv = document.getElementById("today-product-count");
+    countDiv.textContent = `Dnes přidáno: ${todayProducts.length} produktů`;
 }
 
 // Modální okno pro potvrzení
@@ -91,6 +92,9 @@ function updateLocationHistory() {
 
 // Inicializace
 updateStatus("👉 ZAČNI VÝBĚREM OBCHODU");
+document.addEventListener("DOMContentLoaded", () => {
+    updateTodayProductCount();
+});
 
 // Výběr obchodu
 shopZvoleBtn.addEventListener("click", () => {
@@ -174,7 +178,7 @@ categoryCloseBtn.addEventListener("click", () => {
     categoryModal.classList.add("hidden");
 });
 
-// Nahrání souboru na Cloudinary s transformacemi
+// Nahrání souboru na Cloudinary
 async function uploadFile(file) {
     const formData = new FormData();
     formData.append("file", file);
@@ -201,7 +205,7 @@ async function addProduct() {
     const price = document.getElementById("product-price").value;
     const categoryId = categoryIdInput.value;
     const location = document.getElementById("product-location").value.trim();
-    const shippingMethod = document.getElementById("shipping-method").value; // Nové pole pro dopravu
+    const shippingMethod = document.getElementById("shipping-method").value;
 
     if (!name || !price || !categoryId) {
         updateStatus("⚠️ VYPLŇ NÁZEV, CENU A VYBER KATEGORII!");
@@ -223,7 +227,6 @@ async function addProduct() {
 
         const formattedName = `${name.toUpperCase()} | [${selectedShop}]`;
 
-        // Uložení umístění do localStorage, pokud je zadáno
         if (location) {
             let locationHistory = JSON.parse(localStorage.getItem("locationHistory")) || [];
             if (!locationHistory.includes(location)) {
@@ -260,12 +263,13 @@ async function addProduct() {
             duration: 7,
             reexposeType: 0,
             location: JSON.stringify({ countryCode: "CZ", postCode: "789 01", city: "Zvole" }),
-            shippingTemplateId: parseInt(shippingMethod), // Použije vybrané ID dopravy
+            shippingTemplateId: parseInt(shippingMethod),
             shippingPayer: "buyer",
             images: photoUrls.join(" "),
             bestOffer: 1,
             onlyVerifiedBuyersEnabledOverride: 0,
-            attributes: JSON.stringify([])
+            attributes: JSON.stringify(),
+            createdAt: new Date().toISOString()
         };
 
         let products = JSON.parse(localStorage.getItem("products")) || [];
@@ -273,11 +277,10 @@ async function addProduct() {
         localStorage.setItem("products", JSON.stringify(products));
 
         photos = [];
-        photoCount.textContent = "0/3 retro: false;
+        photoCount.textContent = "0/3";
         document.getElementById("product-name").value = "";
         document.getElementById("product-price").value = "";
         document.getElementById("product-location").value = "";
-        document.getElementById("shipping-method").value = "2424163"; // Reset na výchozí dopravu
         categoryIdInput.value = "";
         categoryBtn.textContent = "🔍 Vybrat kategorii";
         productDetails.classList.add("hidden");
@@ -285,6 +288,7 @@ async function addProduct() {
         takePhotoBtn.disabled = false;
 
         updateStatus("🎉 PRODUKT PŘIDÁN! MŮŽEŠ DOKONČIT NEBO PŘIDAT DALŠÍ.");
+        updateTodayProductCount();
     } catch (error) {
         updateStatus(`❌ CHYBA PŘI ZPRACOVÁNÍ NEBO NAHRÁVÁNÍ FOTEK: ${error.message}`);
     }
@@ -384,7 +388,6 @@ async function resetStorage() {
     document.getElementById("product-name").value = "";
     document.getElementById("product-price").value = "";
     document.getElementById("product-location").value = "";
-    document.getElementById("shipping-method").value = "2424163";
     categoryIdInput.value = "";
     categoryBtn.textContent = "🔍 Vybrat kategorii";
     productDetails.classList.add("hidden");
@@ -396,6 +399,7 @@ async function resetStorage() {
     progress.style.width = "0%";
     document.getElementById("saved-products").innerHTML = "";
     updateStatus("🧹 DATA BYLA VYMAZÁNA! ZAČNI ZNOVU.");
+    updateTodayProductCount();
 }
 
 // Navigace mezi kroky s validací
@@ -446,9 +450,12 @@ const deleteDataBtn = document.getElementById("delete-data-btn");
 const closeModalBtn = document.getElementById("close-modal-btn");
 
 window.addEventListener("beforeunload", (e) => {
-    exitModal.classList.remove("hidden");
-    e.preventDefault();
-    e.returnValue = "";
+    const products = JSON.parse(localStorage.getItem("products")) || [];
+    if (products.length > 0) {
+        exitModal.classList.remove("hidden");
+        e.preventDefault();
+        e.returnValue = "";
+    }
 });
 
 deleteDataBtn.addEventListener("click", () => {
@@ -465,6 +472,3 @@ closeModalBtn.addEventListener("click", () => {
 // Propojení tlačítek s funkcemi
 finishBtn.addEventListener("click", finish);
 resetBtn.addEventListener("click", resetStorage);
-
-// Inicializace počtu produktů při načtení stránky
-updateProductCountToday();
