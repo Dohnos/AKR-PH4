@@ -238,9 +238,10 @@ categoryCloseBtn.addEventListener("click", () => {
 
 /* ---------------------------------
    Upload souboru na Cloudinary
-   (FOTKY => IMAGE_DDMMYYYY_HHMM, EXCEL => products_DDMMYYYY_[Z/M])
+   s UNIKÁTNÍMI názvy pro FOTKY
 -----------------------------------*/
-async function uploadFile(file) {
+async function uploadFile(file, indexForImages = 1) {
+  // indexForImages: pokud nahráváme fotky v cyklu, předáme sem i pořadí
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
@@ -253,18 +254,23 @@ async function uploadFile(file) {
   const hours = String(now.getHours()).padStart(2, "0");
   const minutes = String(now.getMinutes()).padStart(2, "0");
   
-  // Složíme "25032025" a "1527" (pro 25.03.2025, 15:27)
-  const dateStr = day + month + year; // např. "25032025"
-  const timeStr = hours + minutes;    // např. "1527"
+  // Složíme "25032025" a "2014"
+  const dateStr = day + month + year; // "25032025"
+  const timeStr = hours + minutes;    // "2014"
+
+  // Krátký náhodný sufix (4 znaky); aby nedošlo ke kolizi
+  const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
 
   if (file.type.includes("image")) {
-    // FOTKY => složka "media_library", název "IMAGE_25032025_1527"
+    // FOTKY => složka "media_library", tvar:
+    // IMAGE_25032025_2014_1_ABCD
     formData.append("folder", "media_library");
-    const publicId = `IMAGE_${dateStr}_${timeStr}`;
+    const publicId = `IMAGE_${dateStr}_${timeStr}_${indexForImages}_${randomSuffix}`;
     formData.append("public_id", publicId);
 
   } else {
-    // EXCEL => složka "excel_files", např. "products_25032025_[Z]"
+    // EXCEL => složka "excel_files", tvar:
+    // products_25032025_[Z]
     formData.append("folder", "excel_files");
     const publicId = `products_${dateStr}_[${selectedShop}]`;
     formData.append("public_id", publicId);
@@ -307,7 +313,8 @@ async function addProduct() {
     const photoUrls = [];
     for (let i = 0; i < photos.length; i++) {
       updateStatus(`🖼️ Nahrávám obrázek ${i + 1}/3...`);
-      const url = await uploadFile(photos[i]);
+      // Předáme index fotky pro unikátní název
+      const url = await uploadFile(photos[i], i + 1);
       photoUrls.push(url);
       const percent = Math.round(((i + 1) / photos.length) * 100);
       progressBar.value = percent;
@@ -487,20 +494,20 @@ async function finish() {
     const blob = new Blob([excelBuffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     });
-    // Vytvoříme File
+
+    // Vytvoříme jméno souboru: products_25032025_[Z].xlsx
     const dateNow = new Date();
     const dd = String(dateNow.getDate()).padStart(2, "0");
     const mm = String(dateNow.getMonth() + 1).padStart(2, "0");
     const yyyy = String(dateNow.getFullYear());
     const dateStr = dd + mm + yyyy; // 25032025
-
-    // "products_25032025_[Z].xlsx" (např.)
     const fileName = `products_${dateStr}_[${selectedShop}].xlsx`;
+
     const file = new File([blob], fileName, {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     });
 
-    // Nahrajeme do Cloudinary
+    // Nahrajeme do Cloudinary (EXCEL => složka excel_files, public_id products_25032025_[Z])
     const excelUrl = await uploadFile(file);
 
     // Zkopírování odkazu do schránky
