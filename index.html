@@ -42,23 +42,19 @@
         >
           👉 Začni výběrem obchodu
         </div>
-        <!-- Lišta pro evidenci denního počtu -->
-        <div
-          class="notification is-info is-light is-rounded py-3 daily-count-bar"
-          style="margin-top: -1rem;"
-        >
-          <p
-            id="daily-count"
-            class="has-text-weight-bold"
-            style="margin: 0;"
-          >
-            (Dnes přidáno: 0 produktů)
-          </p>
-        </div>
       </header>
 
       <!-- Krok 0: Výběr obchodu -->
       <div id="shop-selection" class="box is-rounded step mb-5">
+        <!-- Tlačítka ovládání (vpravo nahoře) -->
+        <div class="is-pulled-right">
+          <button
+            class="nav-btn next-btn button is-text px-2"
+            data-step="0"
+          >
+            ➡️ Dál
+          </button>
+        </div>
         <p class="title is-5 mb-3">
           0️⃣ Vyber obchod
         </p>
@@ -76,18 +72,25 @@
           <i class="fa-solid fa-store"></i>
           <span>Antik Mora [M]</span>
         </button>
-        <div class="has-text-right mt-3">
-          <button
-            class="nav-btn next-btn button is-text px-2"
-            data-step="0"
-          >
-            ➡️ Dál
-          </button>
-        </div>
       </div>
 
       <!-- Krok 1: Focení -->
       <div id="photo-section" class="box is-rounded step mb-5 is-hidden">
+        <!-- Tlačítka ovládání (vpravo nahoře) -->
+        <div class="is-pulled-right">
+          <button
+            class="nav-btn prev-btn button is-text px-2"
+            data-step="1"
+          >
+            ⬅️ Zpět
+          </button>
+          <button
+            class="nav-btn next-btn button is-text px-2"
+            data-step="1"
+          >
+            ➡️ Dál
+          </button>
+        </div>
         <p class="title is-5 mb-4">
           1️⃣ Nafoť fotky
         </p>
@@ -114,24 +117,25 @@
           capture="camera"
           class="is-hidden"
         />
-        <div class="has-text-right mt-4">
+      </div>
+
+      <!-- Krok 2: Detaily produktu -->
+      <div id="product-details" class="box is-rounded step mb-5 is-hidden">
+        <!-- Tlačítka ovládání (vpravo nahoře) -->
+        <div class="is-pulled-right">
           <button
             class="nav-btn prev-btn button is-text px-2"
-            data-step="1"
+            data-step="2"
           >
             ⬅️ Zpět
           </button>
           <button
             class="nav-btn next-btn button is-text px-2"
-            data-step="1"
+            data-step="2"
           >
             ➡️ Dál
           </button>
         </div>
-      </div>
-
-      <!-- Krok 2: Detaily produktu -->
-      <div id="product-details" class="box is-rounded step mb-5 is-hidden">
         <p class="title is-5 mb-4">
           2️⃣ Vyplň detaily
         </p>
@@ -190,10 +194,7 @@
             id="category-btn"
             class="button is-link is-light is-rounded is-fullwidth"
           >
-            <span class="icon">
-              <i class="fa-solid fa-search"></i>
-            </span>
-            <span>Vybrat kategorii</span>
+            <span id="category-btn-text">Vybrat kategorii</span>
           </button>
           <input type="hidden" id="category-id" />
         </div>
@@ -222,7 +223,7 @@
         <!-- Progress bar -->
         <progress
           id="progress-bar"
-          class="progress is-primary is-rounded mb-4 is-hidden"
+          class="progress is-primary is-rounded mb-3 is-hidden"
           value="0"
           max="100"
         >
@@ -231,7 +232,7 @@
 
         <!-- Tlačítko pro přidání produktu -->
         <button
-          class="button is-success is-fullwidth is-rounded mb-3"
+          class="button is-success is-fullwidth is-rounded mb-2"
           onclick="addProduct()"
         >
           <span class="icon">
@@ -239,26 +240,26 @@
           </span>
           <span>Přidat produkt</span>
         </button>
-
-        <!-- Navigace kroků -->
-        <div class="has-text-right">
-          <button
-            class="nav-btn prev-btn button is-text px-2"
-            data-step="2"
-          >
-            ⬅️ Zpět
-          </button>
-          <button
-            class="nav-btn next-btn button is-text px-2"
-            data-step="2"
-          >
-            ➡️ Dál
-          </button>
-        </div>
+        <!-- Zde malý text "Dnes přidáno" -->
+        <p
+          id="daily-count"
+          class="is-size-7 has-text-right has-text-grey"
+        >
+          (Dnes přidáno: 0 produktů)
+        </p>
       </div>
 
       <!-- Krok 3: Dokončení -->
       <div id="finish-section" class="box is-rounded step is-hidden">
+        <!-- Tlačítka ovládání (vpravo nahoře) -->
+        <div class="is-pulled-right">
+          <button
+            class="nav-btn prev-btn button is-text px-2"
+            data-step="3"
+          >
+            ⬅️ Zpět
+          </button>
+        </div>
         <p class="title is-5 mb-4">
           3️⃣ Dokonči
         </p>
@@ -298,14 +299,6 @@
           class="content mt-3 has-text-grey has-text-left is-size-7"
         >
           <!-- Zde se zobrazí info o exportu -->
-        </div>
-        <div class="has-text-right mt-3">
-          <button
-            class="nav-btn prev-btn button is-text px-2"
-            data-step="3"
-          >
-            ⬅️ Zpět
-          </button>
         </div>
       </div>
 
