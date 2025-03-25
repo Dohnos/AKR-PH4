@@ -44,28 +44,20 @@ fetch("MapaKat.txt")
     })
     .catch(error => console.error("Chyba při načítání kategorií:", error));
 
-// Počítadlo produktů za dnešní den
-function getTodayDate() {
-    const today = new Date();
-    return today.toISOString().split("T")[0]; // Formát YYYY-MM-DD
-}
-
-function getTodayProductCount() {
-    const today = getTodayDate();
-    const productCounts = JSON.parse(localStorage.getItem("productCounts")) || {};
-    return productCounts[today] || 0;
-}
-
-function incrementTodayProductCount() {
-    const today = getTodayDate();
-    const productCounts = JSON.parse(localStorage.getItem("productCounts")) || {};
-    productCounts[today] = (productCounts[today] || 0) + 1;
-    localStorage.setItem("productCounts", JSON.stringify(productCounts));
-}
-
 function updateStatus(message) {
-    const todayCount = getTodayProductCount();
-    status.textContent = `${message} | Produktů dnes: ${todayCount}`;
+    status.textContent = message;
+    updateProductCountToday();
+}
+
+// Funkce pro zobrazení počtu produktů přidaných dnes
+function updateProductCountToday() {
+    const today = new Date().toISOString().split("T")[0]; // Dnešní datum ve formátu YYYY-MM-DD
+    const products = JSON.parse(localStorage.getItem("products")) || [];
+    const todayProducts = products.filter(product => {
+        const productDate = new Date(product.startingAt).toISOString().split("T")[0];
+        return productDate === today;
+    });
+    document.getElementById("product-count-today").textContent = `Produktů přidáno dnes: ${todayProducts.length}`;
 }
 
 // Modální okno pro potvrzení
@@ -209,7 +201,7 @@ async function addProduct() {
     const price = document.getElementById("product-price").value;
     const categoryId = categoryIdInput.value;
     const location = document.getElementById("product-location").value.trim();
-    const shippingMethod = document.getElementById("shipping-method").value; // Nové pole dopravy
+    const shippingMethod = document.getElementById("shipping-method").value; // Nové pole pro dopravu
 
     if (!name || !price || !categoryId) {
         updateStatus("⚠️ VYPLŇ NÁZEV, CENU A VYBER KATEGORII!");
@@ -231,7 +223,7 @@ async function addProduct() {
 
         const formattedName = `${name.toUpperCase()} | [${selectedShop}]`;
 
-        // Uložení umístění do localStorage
+        // Uložení umístění do localStorage, pokud je zadáno
         if (location) {
             let locationHistory = JSON.parse(localStorage.getItem("locationHistory")) || [];
             if (!locationHistory.includes(location)) {
@@ -280,14 +272,12 @@ async function addProduct() {
         products.push(product);
         localStorage.setItem("products", JSON.stringify(products));
 
-        // Zvýšení počítadla produktů za dnešní den
-        incrementTodayProductCount();
-
         photos = [];
-        photoCount.textContent = "0/3";
+        photoCount.textContent = "0/3 retro: false;
         document.getElementById("product-name").value = "";
         document.getElementById("product-price").value = "";
         document.getElementById("product-location").value = "";
+        document.getElementById("shipping-method").value = "2424163"; // Reset na výchozí dopravu
         categoryIdInput.value = "";
         categoryBtn.textContent = "🔍 Vybrat kategorii";
         productDetails.classList.add("hidden");
@@ -394,6 +384,7 @@ async function resetStorage() {
     document.getElementById("product-name").value = "";
     document.getElementById("product-price").value = "";
     document.getElementById("product-location").value = "";
+    document.getElementById("shipping-method").value = "2424163";
     categoryIdInput.value = "";
     categoryBtn.textContent = "🔍 Vybrat kategorii";
     productDetails.classList.add("hidden");
@@ -474,3 +465,6 @@ closeModalBtn.addEventListener("click", () => {
 // Propojení tlačítek s funkcemi
 finishBtn.addEventListener("click", finish);
 resetBtn.addEventListener("click", resetStorage);
+
+// Inicializace počtu produktů při načtení stránky
+updateProductCountToday();
