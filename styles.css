@@ -1,186 +1,53 @@
-/* General improvements for better alignment and spacing */
-body {
-    @apply bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex items-center justify-center p-4 font-['Inter'];
+/* Základní přepis a drobné úpravy vzhledu */
+.status {
+  transition: all 0.3s ease;
 }
 
-.container {
-    @apply mx-auto max-w-lg p-8 bg-white rounded-2xl shadow-xl;
-}
-
-/* Header styling */
-header {
-    @apply text-center mb-10;
-}
-
-header h1 {
-    @apply text-4xl font-extrabold text-gray-900 mb-3 tracking-tight;
-}
-
-#status {
-    @apply mt-4 text-lg font-medium text-indigo-700 bg-indigo-50 p-4 rounded-lg shadow-sm border border-indigo-200;
-}
-
-#today-product-count {
-    @apply mt-2 text-sm text-gray-500;
-}
-
-/* Step sections */
 .step {
-    @apply bg-white p-6 rounded-2xl shadow-md mb-6 relative transition-all duration-300 ease-in-out border border-gray-100;
-}
-
-.step h2 {
-    @apply text-2xl font-semibold text-gray-800 mb-5;
+  transition: all 0.3s ease;
 }
 
 .step:hover {
-    @apply shadow-lg border-gray-200;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Buttons */
-.btn {
-    @apply transition-all duration-300 ease-in-out rounded-lg py-3 px-4 text-lg font-semibold flex items-center justify-center w-full;
+/* Skryté sekce dáváme třídou d-none v Bootstrapu */
+.d-none {
+  display: none !important;
 }
 
+/* Zvýraznění najetí na tlačítko */
 .btn:hover {
-    @apply transform -translate-y-0.5 shadow-lg;
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
 }
 
-.btn.bg-blue-500 {
-    @apply bg-indigo-600 text-white;
+/* Modální okna */
+#confirm-modal .modal-dialog,
+#exit-modal .modal-dialog,
+#category-modal .modal-dialog {
+  max-width: 400px;
 }
 
-.btn.bg-blue-500:hover {
-    @apply bg-indigo-700;
-}
-
-.btn.bg-green-500 {
-    @apply bg-emerald-600 text-white;
-}
-
-.btn.bg-green-500:hover {
-    @apply bg-emerald-700;
-}
-
-.btn.bg-red-500 {
-    @apply bg-rose-600 text-white;
-}
-
-.btn.bg-red-500:hover {
-    @apply bg-rose-700;
-}
-
-.btn.bg-gray-500 {
-    @apply bg-gray-600 text-white;
-}
-
-.btn.bg-gray-500:hover {
-    @apply bg-gray-700;
-}
-
-.btn.bg-gray-200 {
-    @apply bg-gray-100 text-gray-800 border border-gray-300;
-}
-
-.btn.bg-gray-200:hover {
-    @apply bg-gray-200 border-gray-400;
-}
-
-/* Inputs and Selects */
-input, select {
-    @apply w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition-all duration-200 ease-in-out bg-gray-50;
-}
-
-input:focus, select:focus {
-    @apply border-indigo-500;
-}
-
-/* Navigation buttons */
-.nav-btn {
-    @apply bg-none border-none font-size-1rem cursor-pointer p-1 text-gray-600 transition-colors duration-200 ease-in-out;
-}
-
-.nav-btn:hover {
-    @apply text-gray-800;
-}
-
-/* Modals */
-#exit-modal, #category-modal, #confirm-modal {
-    @apply fixed inset-0 bg-gray-800 bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50;
-}
-
-#exit-modal .btn, #category-modal .btn, #confirm-modal .btn {
-    @apply inline-flex items-center justify-center w-auto px-4 py-2;
-}
-
-/* Category list */
-#category-list {
-    @apply max-h-64 overflow-y-auto border border-gray-200 rounded-lg;
-}
-
+/* Styly pro kategorii – list group */
 #category-list button {
-    @apply block w-full text-left p-3 border-b border-gray-200 bg-white cursor-pointer transition-colors duration-200 ease-in-out text-sm;
-    white-space: nowrap; /* Prevent text wrapping */
-    overflow: hidden;
-    text-overflow: ellipsis;
+  border: none;
+  background: none;
+  text-align: left;
+  padding: 0.75rem;
+  transition: background-color 0.2s ease;
+  width: 100%;
 }
 
 #category-list button:hover {
-    @apply bg-gray-100;
+  background-color: #f8f9fa;
 }
 
 #category-list button.selected {
-    @apply bg-blue-100 text-blue-800 font-semibold;
+  background-color: #e7f1ff;
 }
 
-.category-item {
-    @apply py-3 px-4 text-gray-700 hover:bg-gray-100 transition-colors duration-200 ease-in-out;
-}
-
-/* Progress bar */
-#progress {
-    @apply transition-width duration-300 ease-in-out bg-indigo-500;
-}
-
-#progress-bar {
-    @apply w-full bg-gray-200 rounded-full h-2.5;
-}
-
-/* Mobile optimization */
-@media (max-width: 640px) {
-    .container {
-        @apply p-6;
-    }
-
-    .step {
-        @apply p-5;
-    }
-
-    .btn {
-        @apply py-2 text-base;
-    }
-
-    input, select {
-        @apply p-2 text-sm;
-    }
-
-    #status {
-        @apply text-base p-3;
-    }
-
-    #today-product-count {
-        @apply text-xs;
-    }
-
-    .nav-btn {
-        @apply p-0.5 text-sm;
-    }
-
-    #category-modal > div {
-        @apply w-11/12 max-w-full; /* Adjust modal width on mobile */
-    }
-
-    #category-list button {
-        @apply text-sm p-2;
-    }
+/* Progres bar animace */
+.progress-bar-animated {
+  transition: width 0.3s ease;
 }
