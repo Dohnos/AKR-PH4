@@ -22,27 +22,23 @@
   transition: transform 0.2s ease;
 }
 
-/* Modál Bulma se zobrazí, pokud má .is-active. 
-   V našem kódu se spouští manuálně JavaScriptem. 
-*/
-
-/* Stavy progress bar (Bulma styl je nativní, zde drobné úpravy) */
-.progress {
-  margin-top: 0.5rem;
-  transition: width 0.3s ease;
-}
-
 /* Seznam kategorií uvnitř modálu */
 #category-list button {
   border: none;
   background: none;
   text-align: left;
-  padding: 0.75rem;
   width: 100%;
+  padding: 0.75rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 #category-list button:hover {
   background-color: #f2f2f2;
+}
+
+/* Progres bar (Bulma style je nativní, tady jen drobné úpravy) */
+.progress {
+  margin-top: 0.5rem;
+  transition: width 0.3s ease;
 }
