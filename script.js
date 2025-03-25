@@ -244,9 +244,16 @@ async function uploadFile(file) {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-  formData.append("folder", "media_library");
 
-  const resp = await fetch(CLOUDINARY_UPLOAD_URL, {
+  // Rozlišení podle typu souboru:
+  if (file.type.includes("image")) {
+    formData.append("folder", "media_library");
+  } else {
+    // Např. pro XLSX
+    formData.append("folder", "excel_files");
+  }
+
+  const response = await fetch(CLOUDINARY_UPLOAD_URL, {
     method: "POST",
     body: formData
   });
