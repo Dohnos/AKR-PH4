@@ -28,6 +28,7 @@ const productDetailsSection = document.getElementById("product-details");
 const finishSection = document.getElementById("finish-section");
 
 const categoryBtn = document.getElementById("category-btn");
+const categoryBtnText = document.getElementById("category-btn-text");
 const categoryIdInput = document.getElementById("category-id");
 const categoryModal = document.getElementById("category-modal");
 const categorySearch = document.getElementById("category-search");
@@ -75,7 +76,7 @@ fetch("MapaKat.txt")
 -----------------------------------*/
 function updateStatus(message) {
   statusElem.textContent = message;
-  // Zde se navíc aktualizuje denní počet
+  // Kdykoli změníme status, zaktualizujeme i "dnes přidáno"
   updateDailyCountDisplay();
 }
 
@@ -223,7 +224,8 @@ function updateCategoryList(query) {
     btn.onmouseout = () => (btn.style.backgroundColor = "");
     btn.onclick = () => {
       categoryIdInput.value = cat.id;
-      categoryBtn.innerHTML = `<i class="fa-solid fa-check"></i> Vybraná kategorie: ${cat.name}`;
+      // Požadavek: zobrazit jen text "VYBRÁNO"
+      categoryBtnText.textContent = "VYBRÁNO";
       updateStatus("✅ Kategorie vybrána!");
       closeModal(categoryModal);
     };
@@ -309,7 +311,7 @@ async function addProduct() {
       return d.toISOString().replace(".000Z", "Z");
     }
 
-    const productDescription = `<div><h3><strong>🛒 NABÍZENÉ ZBOŽÍ 🎁</strong></h3><p>Stav viz. fotografie 📸</p><p><strong> Pro dotazy k aukcím preferuji komunikaci e-mailem. Přeji Vám příjemnou dražbu! Podívejte se i na mé další aukce a objevte skvělé nabídky!</strong></p></div>`;
+    const productDescription = `<div><h3><strong>🛒 NABÍZENÉ ZBOŽÍ 🎁</strong></h3><p>Stav viz. fotografie 📸</p><p><strong>Pro dotazy preferuji komunikaci e-mailem.</strong></p></div>`;
 
     const formattedName = `${name.toUpperCase()} | [${selectedShop}]`;
     const todayStr = getTodayDateString();
@@ -340,7 +342,7 @@ async function addProduct() {
       images: photoUrls.join(" "),
       bestOffer: 1,
       onlyVerifiedBuyersEnabledOverride: 0,
-      attributes: JSON.stringify({}),
+      attributes: JSON.stringify(),
       dateAdded: todayStr
     };
 
@@ -355,7 +357,7 @@ async function addProduct() {
     document.getElementById("product-price").value = "";
     document.getElementById("product-location").value = "";
     categoryIdInput.value = "";
-    categoryBtn.innerHTML = `<i class="fa-solid fa-search"></i> Vybrat kategorii`;
+    categoryBtnText.textContent = "Vybrat kategorii";
     shippingMethodSelect.value = "";
 
     productDetailsSection.classList.add("is-hidden");
@@ -372,6 +374,10 @@ async function addProduct() {
    Přidat další produkt
 -----------------------------------*/
 function addAnotherProduct() {
+  // Reset progress bar pro nový produkt
+  progressBar.value = 0;
+  progressBar.classList.add("is-hidden");
+
   finishSection.classList.add("is-hidden");
   photoSectionSection.classList.remove("is-hidden");
   updateStatus("👉 Nafoť fotky pro další produkt.");
@@ -503,16 +509,16 @@ async function resetStorage() {
   document.getElementById("product-price").value = "";
   document.getElementById("product-location").value = "";
   categoryIdInput.value = "";
-  categoryBtn.innerHTML = `<i class="fa-solid fa-search"></i> Vybrat kategorii`;
+  categoryBtnText.textContent = "Vybrat kategorii";
   shippingMethodSelect.value = "";
+  progressBar.value = 0;
+  progressBar.classList.add("is-hidden");
 
   productDetailsSection.classList.add("is-hidden");
   photoSectionSection.classList.add("is-hidden");
   finishSection.classList.add("is-hidden");
   shopSelectionSection.classList.remove("is-hidden");
   takePhotoBtn.disabled = false;
-  progressBar.value = 0;
-  progressBar.classList.add("is-hidden");
   document.getElementById("saved-products").innerHTML = "";
 
   updateStatus("🧹 Data byla vymazána! Začni znovu.");
