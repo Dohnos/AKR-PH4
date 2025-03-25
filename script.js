@@ -8,7 +8,7 @@ const CLOUDINARY_UPLOAD_PRESET = "AKR_Preset";
    Proměnné
 -----------------------------------*/
 let photos = [];
-let selectedShop = null;
+let selectedShop = null; // [Z] nebo [M]
 let categories = [];
 
 /* ---------------------------------
@@ -135,14 +135,14 @@ updateDailyCountDisplay();
    Výběr obchodu
 -----------------------------------*/
 shopZvoleBtn.addEventListener("click", () => {
-  selectedShop = "Z";
+  selectedShop = "Z"; // obch. param
   shopSelectionSection.classList.add("is-hidden");
   photoSectionSection.classList.remove("is-hidden");
   updateStatus("👉 Vybral jsi Antik Zvole. Nahoď první fotku!");
 });
 
 shopMoraBtn.addEventListener("click", () => {
-  selectedShop = "M";
+  selectedShop = "M"; // obch. param
   shopSelectionSection.classList.add("is-hidden");
   photoSectionSection.classList.remove("is-hidden");
   updateStatus("👉 Vybral jsi Antik Mora. Nahoď první fotku!");
@@ -224,7 +224,6 @@ function updateCategoryList(query) {
     btn.onmouseout = () => (btn.style.backgroundColor = "");
     btn.onclick = () => {
       categoryIdInput.value = cat.id;
-      // Zobrazit jen text "VYBRÁNO"
       categoryBtnText.textContent = "VYBRÁNO";
       updateStatus("✅ Kategorie vybrána!");
       closeModal(categoryModal);
@@ -239,18 +238,36 @@ categoryCloseBtn.addEventListener("click", () => {
 
 /* ---------------------------------
    Upload souboru na Cloudinary
-   (ZDE PROBÍHÁ ZMĚNA PRO EXCEL)
+   (FOTKY => IMAGE_DDMMYYYY_HHMM, EXCEL => products_DDMMYYYY_[Z/M])
 -----------------------------------*/
 async function uploadFile(file) {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
 
-  // Pokud je to obrázek => složka "media_library", jinak => "excel_files"
+  // Vytvoříme datum & čas
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, "0");
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const year = String(now.getFullYear());
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  
+  // Složíme "25032025" a "1527" (pro 25.03.2025, 15:27)
+  const dateStr = day + month + year; // např. "25032025"
+  const timeStr = hours + minutes;    // např. "1527"
+
   if (file.type.includes("image")) {
+    // FOTKY => složka "media_library", název "IMAGE_25032025_1527"
     formData.append("folder", "media_library");
+    const publicId = `IMAGE_${dateStr}_${timeStr}`;
+    formData.append("public_id", publicId);
+
   } else {
+    // EXCEL => složka "excel_files", např. "products_25032025_[Z]"
     formData.append("folder", "excel_files");
+    const publicId = `products_${dateStr}_[${selectedShop}]`;
+    formData.append("public_id", publicId);
   }
 
   const resp = await fetch(CLOUDINARY_UPLOAD_URL, {
@@ -470,15 +487,20 @@ async function finish() {
     const blob = new Blob([excelBuffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     });
-    const file = new File(
-      [blob],
-      `products_${Date.now()}.xlsx`,
-      {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      }
-    );
+    // Vytvoříme File
+    const dateNow = new Date();
+    const dd = String(dateNow.getDate()).padStart(2, "0");
+    const mm = String(dateNow.getMonth() + 1).padStart(2, "0");
+    const yyyy = String(dateNow.getFullYear());
+    const dateStr = dd + mm + yyyy; // 25032025
 
-    // Zde se volá stejná funkce uploadFile, která díky podmínce uloží Excel do "excel_files"
+    // "products_25032025_[Z].xlsx" (např.)
+    const fileName = `products_${dateStr}_[${selectedShop}].xlsx`;
+    const file = new File([blob], fileName, {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+
+    // Nahrajeme do Cloudinary
     const excelUrl = await uploadFile(file);
 
     // Zkopírování odkazu do schránky
