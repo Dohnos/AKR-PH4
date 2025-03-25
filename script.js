@@ -237,42 +237,37 @@ categoryCloseBtn.addEventListener("click", () => {
 });
 
 /* ---------------------------------
-   Upload souboru na Cloudinary
-   s UNIKÁTNÍMI názvy pro FOTKY
+   Nahrávání: Unikátní názvy fotek i excel
 -----------------------------------*/
 async function uploadFile(file, indexForImages = 1) {
-  // indexForImages: pokud nahráváme fotky v cyklu, předáme sem i pořadí
+  // Pro fotky budeme mít indexForImages = i+1
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
 
-  // Vytvoříme datum & čas
+  // Datum & čas
   const now = new Date();
   const day = String(now.getDate()).padStart(2, "0");
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const year = String(now.getFullYear());
   const hours = String(now.getHours()).padStart(2, "0");
   const minutes = String(now.getMinutes()).padStart(2, "0");
-  
-  // Složíme "25032025" a "2014"
   const dateStr = day + month + year; // "25032025"
   const timeStr = hours + minutes;    // "2014"
 
-  // Krátký náhodný sufix (4 znaky); aby nedošlo ke kolizi
+  // Náhodný sufix (4 znaky)
   const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
 
   if (file.type.includes("image")) {
-    // FOTKY => složka "media_library", tvar:
-    // IMAGE_25032025_2014_1_ABCD
     formData.append("folder", "media_library");
+    // Např.: IMAGE_25032025_2014_1_ABCD
     const publicId = `IMAGE_${dateStr}_${timeStr}_${indexForImages}_${randomSuffix}`;
     formData.append("public_id", publicId);
 
   } else {
-    // EXCEL => složka "excel_files", tvar:
-    // products_25032025_[Z]
     formData.append("folder", "excel_files");
-    const publicId = `products_${dateStr}_[${selectedShop}]`;
+    // Např.: products_25032025_[Z]_ABCD
+    const publicId = `products_${dateStr}_[${selectedShop}]_${randomSuffix}`;
     formData.append("public_id", publicId);
   }
 
@@ -342,7 +337,7 @@ async function addProduct() {
       return d.toISOString().replace(".000Z", "Z");
     }
 
-    const productDescription = `<div class="aukro-offer-default"><div data-layout="text"><div><h3><strong>🛒 NABÍZENÉ ZBOŽÍ 🎁</strong></h3><p>Stav viz. fotografie 📸</p><p><strong> Pro dotazy k aukcím preferuji komunikaci e-mailem, z důvodu flexibilnějšího a rychlejšího vyřízení požadavku. Přeji Vám příjemnou dražbu! 💌 Podívejte se i na mé další aukce a objevte skvělé nabídky! 🚀</strong></p><p><br></p><h3><strong>⚠️ INFORMACE O AUKCI :</strong></h3><p>Na platby čekám jeden týden od vydražení aukce, zboží <strong>zasílám 7-10 dní po obdržení platby</strong>. Zboží bude znovu vystaveno, zda-li nebude uhrazeno v této lhůtě.</p><p>Berte prosím na vědomí, že vydražené zboží <strong>nezasílám na DOBÍRKU</strong>. Zboží mohu zasílat přes <strong>KURÝRNÍ SLUŽBU (DPD) & také ZÁSILKOVNU</strong>.</p><p><br></p><h3><strong>💳 PLATBA :</strong></h3><p>Platbu můžete uskutečnit pouze <strong>BANKOVNÍM PŘEVODEM</strong>. Číslo bankovního účtu <strong>najdete ve výherním e-mailu</strong>. Děkuji za pochopení. <strong>(Při platbě BANKOVNÍM PŘEVODEM, prosím uvést ČÍSLO NABÍDKY, které je uvedeno u AUKCE)</strong></p><p><a href="https://aukro.cz/uzivatel/ZvoleAnt/nabidky"><img src="https://i.postimg.cc/nMbG3ZG9/A.png" alt="Nabízené zboží" style="display:block; margin:auto;"></a></p></div></div></div>`;
+    const productDescription = `<div><h3><strong>🛒 NABÍZENÉ ZBOŽÍ 🎁</strong></h3><p>Stav viz. fotografie 📸</p><p><strong>Pro dotazy preferuji komunikaci e-mailem.</strong></p></div>`;
 
     const formattedName = `${name.toUpperCase()} | [${selectedShop}]`;
     const todayStr = getTodayDateString();
@@ -373,7 +368,7 @@ async function addProduct() {
       images: photoUrls.join(" "),
       bestOffer: 1,
       onlyVerifiedBuyersEnabledOverride: 0,
-      attributes: JSON.stringify(),
+      attributes: JSON.stringify({}),
       dateAdded: todayStr
     };
 
@@ -500,15 +495,19 @@ async function finish() {
     const dd = String(dateNow.getDate()).padStart(2, "0");
     const mm = String(dateNow.getMonth() + 1).padStart(2, "0");
     const yyyy = String(dateNow.getFullYear());
-    const dateStr = dd + mm + yyyy; // 25032025
+    const dateStr = dd + mm + yyyy; 
     const fileName = `products_${dateStr}_[${selectedShop}].xlsx`;
 
     const file = new File([blob], fileName, {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     });
 
-    // Nahrajeme do Cloudinary (EXCEL => složka excel_files, public_id products_25032025_[Z])
-    const excelUrl = await uploadFile(file);
+    // Pro Excel: doplníme i unikátní sufix do public_id
+    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+
+    // Upload: voláme stejnou funkci, ale 2. argument nepotřebujeme
+    // because we won't pass an index for images, just do:
+    const excelUrl = await uploadFileForExcel(file, randomSuffix);
 
     // Zkopírování odkazu do schránky
     navigator.clipboard.writeText(excelUrl).then(
@@ -529,6 +528,39 @@ async function finish() {
   } catch (error) {
     updateStatus(`❌ Chyba při nahrávání Excelu: ${error.message}`);
   }
+}
+
+/* ---------------------------------
+   Funkce pro Excel s unikátním sufixem
+-----------------------------------*/
+async function uploadFileForExcel(file, randomSuffix) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+  // Připravíme datum
+  const now = new Date();
+  const dd = String(now.getDate()).padStart(2, "0");
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const yyyy = String(now.getFullYear());
+  const dateStr = dd + mm + yyyy; 
+
+  // Např. products_25032025_[Z]_ABCD
+  const publicId = `products_${dateStr}_[${selectedShop}]_${randomSuffix}`;
+
+  formData.append("folder", "excel_files");
+  formData.append("public_id", publicId);
+
+  const resp = await fetch(CLOUDINARY_UPLOAD_URL, {
+    method: "POST",
+    body: formData
+  });
+  if (!resp.ok) {
+    const errorText = await resp.text();
+    throw new Error(`Chyba při nahrávání Excelu: ${resp.status} - ${errorText}`);
+  }
+  const data = await resp.json();
+  return data.secure_url;
 }
 
 /* ---------------------------------
