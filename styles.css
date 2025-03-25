@@ -1,53 +1,48 @@
-/* Základní přepis a drobné úpravy vzhledu */
-.status {
-  transition: all 0.3s ease;
-}
+/* Obecné základní styly */
 
-.step {
-  transition: all 0.3s ease;
-}
-
-.step:hover {
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Skryté sekce dáváme třídou d-none v Bootstrapu */
-.d-none {
+/* Skrytí sekcí */
+.is-hidden {
   display: none !important;
 }
 
-/* Zvýraznění najetí na tlačítko */
-.btn:hover {
+/* Zvýraznění boxu při hoveru */
+.step:hover {
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.07);
+  transition: box-shadow 0.2s ease;
+}
+
+/* Přechod pro status text */
+#status {
+  transition: all 0.3s ease;
+}
+
+/* Nudges pro button hover */
+.button:hover {
   transform: translateY(-2px);
   transition: transform 0.2s ease;
 }
 
-/* Modální okna */
-#confirm-modal .modal-dialog,
-#exit-modal .modal-dialog,
-#category-modal .modal-dialog {
-  max-width: 400px;
+/* Modál Bulma se zobrazí, pokud má .is-active. 
+   V našem kódu se spouští manuálně JavaScriptem. 
+*/
+
+/* Stavy progress bar (Bulma styl je nativní, zde drobné úpravy) */
+.progress {
+  margin-top: 0.5rem;
+  transition: width 0.3s ease;
 }
 
-/* Styly pro kategorii – list group */
+/* Seznam kategorií uvnitř modálu */
 #category-list button {
   border: none;
   background: none;
   text-align: left;
   padding: 0.75rem;
-  transition: background-color 0.2s ease;
   width: 100%;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 #category-list button:hover {
-  background-color: #f8f9fa;
-}
-
-#category-list button.selected {
-  background-color: #e7f1ff;
-}
-
-/* Progres bar animace */
-.progress-bar-animated {
-  transition: width 0.3s ease;
+  background-color: #f2f2f2;
 }
