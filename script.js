@@ -224,7 +224,7 @@ function updateCategoryList(query) {
     btn.onmouseout = () => (btn.style.backgroundColor = "");
     btn.onclick = () => {
       categoryIdInput.value = cat.id;
-      // Požadavek: zobrazit jen text "VYBRÁNO"
+      // Zobrazit jen text "VYBRÁNO"
       categoryBtnText.textContent = "VYBRÁNO";
       updateStatus("✅ Kategorie vybrána!");
       closeModal(categoryModal);
@@ -239,21 +239,21 @@ categoryCloseBtn.addEventListener("click", () => {
 
 /* ---------------------------------
    Upload souboru na Cloudinary
+   (ZDE PROBÍHÁ ZMĚNA PRO EXCEL)
 -----------------------------------*/
 async function uploadFile(file) {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
 
-  // Rozlišení podle typu souboru:
+  // Pokud je to obrázek => složka "media_library", jinak => "excel_files"
   if (file.type.includes("image")) {
     formData.append("folder", "media_library");
   } else {
-    // Např. pro XLSX
     formData.append("folder", "excel_files");
   }
 
-  const response = await fetch(CLOUDINARY_UPLOAD_URL, {
+  const resp = await fetch(CLOUDINARY_UPLOAD_URL, {
     method: "POST",
     body: formData
   });
@@ -349,7 +349,7 @@ async function addProduct() {
       images: photoUrls.join(" "),
       bestOffer: 1,
       onlyVerifiedBuyersEnabledOverride: 0,
-      attributes: JSON.stringify(),
+      attributes: JSON.stringify({}),
       dateAdded: todayStr
     };
 
@@ -478,6 +478,7 @@ async function finish() {
       }
     );
 
+    // Zde se volá stejná funkce uploadFile, která díky podmínce uloží Excel do "excel_files"
     const excelUrl = await uploadFile(file);
 
     // Zkopírování odkazu do schránky
