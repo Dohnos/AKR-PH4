@@ -166,8 +166,8 @@ function updateCategoryList(query) {
 
     filteredCategories.forEach(category => {
         const btn = document.createElement("button");
-        btn.textContent = category.name;
-        btn.dataset.id = category.id;
+        btn.textContent = category.name; // Display only the name, as in your example
+        btn.dataset.id = category.id; // Set the data-id attribute
         btn.classList.add("category-item");
         btn.addEventListener("click", () => {
             categoryIdInput.value = category.id;
