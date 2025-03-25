@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Přidat produkt (Bulma verze)</title>
+  <title>Přidat produkt (Bulma verze, tlačítka dole)</title>
   
   <!-- Bulma CSS -->
   <link
@@ -46,18 +46,10 @@
 
       <!-- Krok 0: Výběr obchodu -->
       <div id="shop-selection" class="box is-rounded step mb-5">
-        <!-- Tlačítka ovládání (vpravo nahoře) -->
-        <div class="is-pulled-right">
-          <button
-            class="nav-btn next-btn button is-text px-2"
-            data-step="0"
-          >
-            ➡️ Dál
-          </button>
-        </div>
-        <p class="title is-5 mb-3">
+        <p class="title is-5 mb-4">
           0️⃣ Vyber obchod
         </p>
+
         <button
           id="shop-zvole"
           class="button is-primary is-fullwidth is-rounded mb-3"
@@ -72,28 +64,35 @@
           <i class="fa-solid fa-store"></i>
           <span>Antik Mora [M]</span>
         </button>
+        
+        <!-- Tlačítka dole: Zpět (není potřeba v prvním kroku) a Dál -->
+        <div class="is-clearfix mt-4">
+          <!-- Zpět je schované, protože v prvním kroku to nedává smysl -->
+          <div class="is-pulled-left" style="visibility: hidden;">
+            <button
+              class="nav-btn prev-btn button is-text"
+              data-step="0"
+            >
+              <i class="fa-solid fa-arrow-left"></i> Zpět
+            </button>
+          </div>
+          <div class="is-pulled-right">
+            <button
+              class="nav-btn next-btn button is-text"
+              data-step="0"
+            >
+              Dál <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Krok 1: Focení -->
       <div id="photo-section" class="box is-rounded step mb-5 is-hidden">
-        <!-- Tlačítka ovládání (vpravo nahoře) -->
-        <div class="is-pulled-right">
-          <button
-            class="nav-btn prev-btn button is-text px-2"
-            data-step="1"
-          >
-            ⬅️ Zpět
-          </button>
-          <button
-            class="nav-btn next-btn button is-text px-2"
-            data-step="1"
-          >
-            ➡️ Dál
-          </button>
-        </div>
         <p class="title is-5 mb-4">
           1️⃣ Nafoť fotky
         </p>
+
         <button
           id="take-photo-btn"
           class="button is-success is-fullwidth is-rounded"
@@ -117,25 +116,30 @@
           capture="camera"
           class="is-hidden"
         />
+        
+        <!-- Tlačítka dole: Zpět a Dál -->
+        <div class="is-clearfix mt-4">
+          <div class="is-pulled-left">
+            <button
+              class="nav-btn prev-btn button is-text"
+              data-step="1"
+            >
+              <i class="fa-solid fa-arrow-left"></i> Zpět
+            </button>
+          </div>
+          <div class="is-pulled-right">
+            <button
+              class="nav-btn next-btn button is-text"
+              data-step="1"
+            >
+              Dál <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Krok 2: Detaily produktu -->
       <div id="product-details" class="box is-rounded step mb-5 is-hidden">
-        <!-- Tlačítka ovládání (vpravo nahoře) -->
-        <div class="is-pulled-right">
-          <button
-            class="nav-btn prev-btn button is-text px-2"
-            data-step="2"
-          >
-            ⬅️ Zpět
-          </button>
-          <button
-            class="nav-btn next-btn button is-text px-2"
-            data-step="2"
-          >
-            ➡️ Dál
-          </button>
-        </div>
         <p class="title is-5 mb-4">
           2️⃣ Vyplň detaily
         </p>
@@ -184,7 +188,7 @@
             />
           </div>
           <p id="location-history" class="help mt-1">
-            (Historie umístění se objeví zde)
+            (Žádná historie umístění)
           </p>
         </div>
 
@@ -207,14 +211,11 @@
           <div class="control">
             <div class="select is-rounded is-fullwidth">
               <select id="shippingMethod">
-                <option value="" disabled selected hidden>
-                  -- Zvolte dopravu --
-                </option>
-                <!-- Ukázkové ID -->
-<option value="2424163">Zásilkovna (ID 2424163)</option>
-<option value="2426697">DPD (ID 2426697)</option>
-<option value="2435308">Toptrans (ID 2435308)</option>
-<option value="2435307">Osobně (ID 2435307)</option>
+                <!-- Příklad dle fotky -->
+                <option value="2424163">Zásilkovna (ID 2424163)</option>
+                <option value="2426697">DPD (ID 2426697)</option>
+                <option value="2435308">Toptrans (ID 2435308)</option>
+                <option value="2435307">Osobně (ID 2435307)</option>
               </select>
             </div>
           </div>
@@ -247,22 +248,34 @@
         >
           (Dnes přidáno: 0 produktů)
         </p>
+
+        <!-- Tlačítka dole: Zpět a Dál -->
+        <div class="is-clearfix mt-4">
+          <div class="is-pulled-left">
+            <button
+              class="nav-btn prev-btn button is-text"
+              data-step="2"
+            >
+              <i class="fa-solid fa-arrow-left"></i> Zpět
+            </button>
+          </div>
+          <div class="is-pulled-right">
+            <button
+              class="nav-btn next-btn button is-text"
+              data-step="2"
+            >
+              Dál <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Krok 3: Dokončení -->
       <div id="finish-section" class="box is-rounded step is-hidden">
-        <!-- Tlačítka ovládání (vpravo nahoře) -->
-        <div class="is-pulled-right">
-          <button
-            class="nav-btn prev-btn button is-text px-2"
-            data-step="3"
-          >
-            ⬅️ Zpět
-          </button>
-        </div>
         <p class="title is-5 mb-4">
           3️⃣ Dokonči
         </p>
+        
         <button
           id="add-another-btn"
           class="button is-info is-fullwidth is-rounded mb-2"
@@ -299,6 +312,27 @@
           class="content mt-3 has-text-grey has-text-left is-size-7"
         >
           <!-- Zde se zobrazí info o exportu -->
+        </div>
+
+        <!-- Tlačítka dole: Zpět a nic (protože to je poslední krok) -->
+        <div class="is-clearfix mt-4">
+          <div class="is-pulled-left">
+            <button
+              class="nav-btn prev-btn button is-text"
+              data-step="3"
+            >
+              <i class="fa-solid fa-arrow-left"></i> Zpět
+            </button>
+          </div>
+          <div class="is-pulled-right" style="visibility: hidden;">
+            <!-- skryté tlačítko "Dál", v posledním kroku ho nepotřebujeme -->
+            <button
+              class="nav-btn next-btn button is-text"
+              data-step="3"
+            >
+              Dál <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
         </div>
       </div>
 
