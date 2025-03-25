@@ -34,13 +34,21 @@ const resetBtn = document.getElementById("reset-btn");
 fetch("MapaKat.txt")
     .then(response => response.text())
     .then(text => {
-        categories = text.split("\n")
-            .filter(line => line.trim())
-            .map(line => {
-                const match = line.match(/(.*)\((\d+)\)/);
-                return match ? { name: match[1].trim(), id: parseInt(match[2]) } : null;
-            })
-            .filter(category => category);
+        // Split by newlines and clean up any extra whitespace
+        const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line);
+        categories = lines.map(line => {
+            // Match the category name and ID using a more robust regex
+            const match = line.match(/^(.*?)\((\d+)\)$/);
+            if (match) {
+                const name = match[1].trim();
+                const id = parseInt(match[2]);
+                return { name, id };
+            }
+            return null;
+        }).filter(category => category);
+
+        // Log categories for debugging
+        console.log("Parsed categories:", categories);
     })
     .catch(error => console.error("Chyba při načítání kategorií:", error));
 
@@ -51,7 +59,7 @@ function updateStatus(message) {
 
 // Funkce pro aktualizaci počtu produktů přidaných dnes
 function updateTodayProductCount() {
-    const today = new Date().toISOString().split("T")[0]; // Dnešní datum ve formátu YYYY-MM-DD
+    const today = new Date().toISOString().split("T")[0];
     const products = JSON.parse(localStorage.getItem("products")) || [];
     const todayProducts = products.filter(product => {
         if (!product.createdAt) return false;
