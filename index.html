@@ -2,150 +2,95 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aukro Produkt Uploader</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>📷 Přidat produkt</title>
+    <!-- Tailwind CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        .section {
-            margin-bottom: 20px;
-        }
-        .btn {
-            transition: background-color 0.3s, transform 0.1s;
-        }
-        .btn:hover {
-            transform: scale(1.05);
-        }
-        #status {
-            font-weight: bold;
-            padding: 10px;
-            border-radius: 5px;
-            background-color: #e0f7fa;
-            text-align: center;
-        }
-        #progress-bar {
-            background-color: #e0e0e0;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        #progress {
-            height: 10px;
-            background-color: #4caf50;
-            transition: width 0.3s;
-        }
-        .modal {
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-        .modal-content {
-            background-color: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        #category-list button {
-            display: block;
-            width: 100%;
-            text-align: left;
-            padding: 10px;
-            margin: 5px 0;
-            background-color: #f0f0f0;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        #category-list button:hover {
-            background-color: #e0e0e0;
-        }
-        input, select {
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 8px;
-            width: 100%;
-            margin-top: 5px;
-        }
-        label {
-            font-weight: 500;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body>
-    <div class="container">
-        <div id="shop-selection" class="section">
-            <h2 class="text-xl font-bold mb-4">Vyber obchod</h2>
-            <button id="shop-zvole" class="btn bg-blue-500 text-white px-4 py-2 rounded mr-2">Antik Zvole</button>
-            <button id="shop-mora" class="btn bg-blue-500 text-white px-4 py-2 rounded">Antik Mora</button>
-        </div>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="container mx-auto max-w-md p-6">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">📷 Přidat produkt</h1>
+            <div id="status" class="status mt-3 text-lg font-semibold text-blue-800 bg-blue-100 p-4 rounded-lg shadow-md border border-blue-300">👉 ZAČNI VÝBĚREM OBCHODU</div>
+            <div id="today-product-count" class="mt-2 text-sm text-gray-600">Dnes přidáno: 0 produktů</div>
+        </header>
 
-        <div id="photo-section" class="section hidden">
-            <h2 class="text-xl font-bold mb-4">Nafoť produkt</h2>
-            <button id="take-photo-btn" class="btn bg-green-500 text-white px-4 py-2 rounded">Nafoť fotku</button>
-            <input type="file" id="photo-input" accept="image/*" capture="environment" class="hidden">
-            <p id="photo-count" class="mt-2">Počet fotek: <span>0/3</span></p>
-        </div>
+        <!-- Krok 0: Výběr obchodu -->
+        <section id="shop-selection" class="step bg-white p-6 rounded-xl shadow-lg mb-6 relative">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">0️⃣ Vyber obchod</h2>
+            <button id="shop-zvole" class="btn w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg mb-3 flex items-center justify-center text-lg">Antik Zvole [Z]</button>
+            <button id="shop-mora" class="btn w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg flex items-center justify-center text-lg">Antik Mora [M]</button>
+            <div class="absolute top-2 right-2 flex space-x-2">
+                <button class="nav-btn next-btn" data-step="0">➡️</button>
+            </div>
+        </section>
 
-        <div id="product-details" class="section hidden">
-            <h2 class="text-xl font-bold mb-4">Detaily produktu</h2>
-            <div class="mb-4">
-                <label for="product-name" class="block text-sm font-medium text-gray-700">Název produktu:</label>
-                <input type="text" id="product-name" class="mt-1 p-2 border rounded w-full" placeholder="Zadej název">
+        <!-- Krok 1: Focení -->
+        <section id="photo-section" class="step bg-white p-6 rounded-xl shadow-lg mb-6 hidden relative">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">1️⃣ Nafoť fotky</h2>
+            <button id="take-photo-btn" class="btn w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg flex items-center justify-center text-lg">
+                📸 Nafoť fotku
+            </button>
+            <p id="photo-count" class="text-center mt-4 text-gray-600 text-sm">Nafoceno: <span>0/3</span> 🎞️</p>
+            <input type="file" id="photo-input" accept="image/*" capture="camera" class="hidden">
+            <div class="absolute top-2 right-2 flex space-x-2">
+                <button class="nav-btn prev-btn" data-step="1">⬅️</button>
+                <button class="nav-btn next-btn" data-step="1">➡️</button>
             </div>
-            <div class="mb-4">
-                <label for="product-price" class="block text-sm font-medium text-gray-700">Cena (Kč):</label>
-                <input type="number" id="product-price" class="mt-1 p-2 border rounded w-full" placeholder="Zadej cenu">
-            </div>
-            <div class="mb-4">
+        </section>
+
+        <!-- Krok 2: Detaily produktu -->
+        <section id="product-details" class="step bg-white p-6 rounded-xl shadow-lg mb-6 hidden relative">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">2️⃣ Vyplň detaily</h2>
+            <input type="text" id="product-name" placeholder="📦 Název produktu" class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            <input type="number" id="product-price" placeholder="💰 Cena (Kč)" class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            <div class="mt-4">
                 <label for="product-location" class="block text-sm font-medium text-gray-700">Umístění (nepovinné):</label>
                 <input type="text" id="product-location" class="mt-1 p-2 border rounded w-full" placeholder="Zadej umístění">
                 <div id="location-history" class="mt-2 text-sm text-gray-500"></div>
             </div>
-            <div class="mb-4">
-                <label for="shipping-method" class="block text-sm font-medium text-gray-700">Způsob dopravy:</label>
-                <select id="shipping-method" class="mt-1 p-2 border rounded w-full">
-                    <option value="2424163">Zásilkovna (ID: 2424163)</option>
-                    <option value="2426697">DPD (ID: 2426697)</option>
-                    <option value="2435308">TOPTRANS (ID: 2435308)</option>
-                    <option value="2435307">Osobně (ID: 2435307)</option>
+            <button id="category-btn" class="btn w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 mb-4 rounded-lg flex items-center justify-center text-sm">🔍 Vybrat kategorii</button>
+            <input type="hidden" id="category-id">
+            <div class="mt-4">
+                <label for="shipping-method" class="block text-sm font-medium text-gray-700">Vyber způsob dopravy:</label>
+                <select id="shipping-method" class="mt-1 p-2 border rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <option value="2424163" selected>ZÁSILKOVNA (2424163)</option>
+                    <option value="2426697">DPD (2426697)</option>
+                    <option value="2435308">TOPTRANS (2435308)</option>
+                    <option value="2435307">OSOBNĚ (2435307)</option>
                 </select>
             </div>
-            <button id="category-btn" class="btn bg-purple-500 text-white px-4 py-2 rounded">🔍 Vybrat kategorii</button>
-        </div>
-
-        <div id="finish-section" class="section hidden">
-            <h2 class="text-xl font-bold mb-4">Dokončení</h2>
-            <button id="finish-btn" class="btn bg-blue-500 text-white px-4 py-2 rounded mr-2">Odeslat přes WhatsApp</button>
-            <button id="reset-btn" class="btn bg-gray-500 text-white px-4 py-2 rounded mr-2">Obnovit data</button>
-            <button onclick="addAnotherProduct()" class="btn bg-green-500 text-white px-4 py-2 rounded">Přidat další produkt</button>
-            <div id="saved-products" class="mt-4"></div>
-        </div>
-
-        <div id="status" class="mt-4">👉 ZAČNI VÝBĚREM OBCHODU</div>
-        <div id="product-count-today" class="text-sm text-gray-500 mt-2 text-center"></div>
-        <div id="progress-bar" class="mt-4 hidden">
-            <div id="progress" style="width: 0%;"></div>
-        </div>
-
-        <div id="category-modal" class="modal fixed inset-0 flex items-center justify-center hidden">
-            <div class="modal-content w-11/12 max-w-md">
-                <h2 class="text-xl font-bold mb-4">Vyber kategorii</h2>
-                <input type="text" id="category-search" class="w-full p-2 border rounded mb-4" placeholder="Hledej kategorii...">
-                <div id="category-list"></div>
-                <button id="category-close-btn" class="btn bg-red-500 text-white px-4 py-2 rounded mt-4">Zavřít</button>
+            <div id="progress-bar" class="w-full bg-gray-200 rounded-full h-2.5 hidden">
+                <div id="progress" class="bg-green-500 h-2.5 rounded-full" style="width: 0%;"></div>
             </div>
-        </div>
+            <button onclick="addProduct()" class="btn w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg mt-4 flex items-center justify-center text-lg">
+                ✅ Přidat produkt
+            </button>
+            <div class="absolute top-2 right-2 flex space-x-2">
+                <button class="nav-btn prev-btn" data-step="2">⬅️</button>
+                <button class="nav-btn next-btn" data-step="2">➡️</button>
+            </div>
+        </section>
+
+        <!-- Krok 3: Dokončení -->
+        <section id="finish-section" class="step bg-white p-6 rounded-xl shadow-lg hidden relative">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">3️⃣ Dokonči</h2>
+            <button id="add-another-btn" onclick="addAnotherProduct()" class="btn w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg mb-3 flex items-center justify-center text-lg">
+                ➕ Přidat další produkt
+            </button>
+            <button id="finish-btn" onclick="finish()" class="btn w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg mb-3 flex items-center justify-center text-lg">
+                🚀 Odeslat přes WhatsApp
+            </button>
+            <button id="reset-btn" onclick="resetStorage()" class="btn w-full bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-lg flex items-center justify-center text-lg">
+                🗑️ Obnovit data
+            </button>
+            <div id="saved-products" class="mt-4 text-gray-600 text-sm"></div>
+            <div class="absolute top-2 right-2 flex space-x-2">
+                <button class="nav-btn prev-btn" data-step="3">⬅️</button>
+            </div>
+        </section>
 
         <div id="confirm-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
             <div class="bg-white p-6 rounded shadow-lg">
@@ -157,12 +102,23 @@
             </div>
         </div>
 
-        <div id="exit-modal" class="modal fixed inset-0 flex items-center justify-center hidden">
-            <div class="modal-content w-11/12 max-w-md">
-                <h2 class="text-xl font-bold mb-4">Opravdu chceš opustit stránku?</h2>
-                <p class="mb-4">Data budou vymazána.</p>
-                <button id="delete-data-btn" class="btn bg-red-500 text-white px-4 py-2 rounded mr-2">Vymazat data</button>
-                <button id="close-modal-btn" class="btn bg-gray-500 text-white px-4 py-2 rounded">Zavřít</button>
+        <!-- Vlastní dialog pro opuštění stránky -->
+        <div id="exit-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden">
+            <div class="bg-white p-6 rounded-xl shadow-lg text-center max-w-sm w-full">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Vymazal jsi data, když jsi skončil?</h2>
+                <p class="text-gray-600 mb-6">Pokud ne, můžeš to udělat teď.</p>
+                <button id="delete-data-btn" class="btn bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg mb-3">🗑️ Vymazat data</button>
+                <button id="close-modal-btn" class="btn bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg">Pokračovat bez mazání</button>
+            </div>
+        </div>
+
+        <!-- Modální okno pro výběr kategorie -->
+        <div id="category-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden">
+            <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Vyber kategorii</h2>
+                <input type="text" id="category-search" placeholder="🔍 Hledej kategorii" class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                <div id="category-list" class="max-h-64 overflow-y-auto"></div>
+                <button id="category-close-btn" class="btn w-full bg-gray-500 hover:bg-gray-600 text-white py-3 mt-4 rounded-lg">Zavřít</button>
             </div>
         </div>
     </div>
