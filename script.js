@@ -168,6 +168,7 @@ function updateCategoryList(query) {
         const btn = document.createElement("button");
         btn.textContent = category.name;
         btn.dataset.id = category.id;
+        btn.classList.add("category-item");
         btn.addEventListener("click", () => {
             categoryIdInput.value = category.id;
             categoryBtn.textContent = `Vybrána kategorie: ${category.name}`;
