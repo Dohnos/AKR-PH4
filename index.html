@@ -5,204 +5,150 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aukro Produkt Uploader</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f4f4f9;
-            margin: 0;
-            padding: 20px;
             color: #333;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
-            background: white;
             padding: 20px;
+            background: #fff;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            font-size: 24px;
-            margin-bottom: 20px;
         }
         .section {
             margin-bottom: 20px;
         }
-        .hidden {
-            display: none;
+        .btn {
+            transition: background-color 0.3s, transform 0.1s;
         }
-        button {
-            background-color: #3498db;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        label {
-            font-weight: bold;
-            color: #2c3e50;
+        .btn:hover {
+            transform: scale(1.05);
         }
         #status {
-            text-align: center;
-            margin: 20px 0;
-            padding: 10px;
-            background-color: #e8f4f8;
-            border-radius: 5px;
-            color: #2c3e50;
             font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #e0f7fa;
+            text-align: center;
         }
         #progress-bar {
-            width: 100%;
-            background-color: #ddd;
+            background-color: #e0e0e0;
             border-radius: 5px;
             overflow: hidden;
-            margin-top: 10px;
         }
         #progress {
-            width: 0%;
             height: 10px;
-            background-color: #3498db;
+            background-color: #4caf50;
             transition: width 0.3s;
         }
         .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
         }
         .modal-content {
-            background: white;
-            padding: 20px;
+            background-color: #fff;
             border-radius: 10px;
-            width: 90%;
-            max-width: 500px;
+            padding: 20px;
             max-height: 80vh;
             overflow-y: auto;
         }
-        .modal-content button {
+        #category-list button {
             display: block;
             width: 100%;
+            text-align: left;
+            padding: 10px;
             margin: 5px 0;
-            background-color: #ecf0f1;
-            color: #2c3e50;
-            border: 1px solid #ddd;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
         }
-        .modal-content button:hover {
-            background-color: #dfe6e9;
+        #category-list button:hover {
+            background-color: #e0e0e0;
         }
-        #category-search {
-            margin-bottom: 10px;
+        input, select {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 8px;
+            width: 100%;
+            margin-top: 5px;
         }
-        #photo-count {
-            text-align: center;
-            font-size: 18px;
-            color: #7f8c8d;
-            margin-top: 10px;
-        }
-        .nav-btn {
-            background-color: #7f8c8d;
-            margin: 5px;
-        }
-        .nav-btn:hover {
-            background-color: #95a5a6;
+        label {
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Aukro Produkt Uploader</h1>
-
-        <!-- Výběr obchodu -->
         <div id="shop-selection" class="section">
-            <button id="shop-zvole">Antik Zvole</button>
-            <button id="shop-mora">Antik Mora</button>
+            <h2 class="text-xl font-bold mb-4">Vyber obchod</h2>
+            <button id="shop-zvole" class="btn bg-blue-500 text-white px-4 py-2 rounded mr-2">Antik Zvole</button>
+            <button id="shop-mora" class="btn bg-blue-500 text-white px-4 py-2 rounded">Antik Mora</button>
         </div>
 
-        <!-- Focení -->
         <div id="photo-section" class="section hidden">
-            <button id="take-photo-btn">Nafoť produkt</button>
+            <h2 class="text-xl font-bold mb-4">Nafoť produkt</h2>
+            <button id="take-photo-btn" class="btn bg-green-500 text-white px-4 py-2 rounded">Nafoť fotku</button>
             <input type="file" id="photo-input" accept="image/*" capture="environment" class="hidden">
-            <div id="photo-count">Počet fotek: <span>0/3</span></div>
-            <button class="nav-btn" data-step="1">Zpět</button>
-            <button class="nav-btn next-btn" data-step="1">Další</button>
+            <p id="photo-count" class="mt-2">Počet fotek: <span>0/3</span></p>
         </div>
 
-        <!-- Detaily produktu -->
         <div id="product-details" class="section hidden">
+            <h2 class="text-xl font-bold mb-4">Detaily produktu</h2>
             <div class="mb-4">
-                <label for="product-name">Název produktu:</label>
-                <input type="text" id="product-name" placeholder="Zadej název">
+                <label for="product-name" class="block text-sm font-medium text-gray-700">Název produktu:</label>
+                <input type="text" id="product-name" class="mt-1 p-2 border rounded w-full" placeholder="Zadej název">
             </div>
             <div class="mb-4">
-                <label for="product-price">Cena (Kč):</label>
-                <input type="number" id="product-price" placeholder="Zadej cenu">
+                <label for="product-price" class="block text-sm font-medium text-gray-700">Cena (Kč):</label>
+                <input type="number" id="product-price" class="mt-1 p-2 border rounded w-full" placeholder="Zadej cenu">
             </div>
             <div class="mb-4">
-                <label for="product-location">Umístění (nepovinné):</label>
-                <input type="text" id="product-location" placeholder="Zadej umístění">
+                <label for="product-location" class="block text-sm font-medium text-gray-700">Umístění (nepovinné):</label>
+                <input type="text" id="product-location" class="mt-1 p-2 border rounded w-full" placeholder="Zadej umístění">
                 <div id="location-history" class="mt-2 text-sm text-gray-500"></div>
             </div>
             <div class="mb-4">
-                <label for="shipping-method">Doprava:</label>
-                <select id="shipping-method">
+                <label for="shipping-method" class="block text-sm font-medium text-gray-700">Způsob dopravy:</label>
+                <select id="shipping-method" class="mt-1 p-2 border rounded w-full">
                     <option value="2424163">Zásilkovna (ID: 2424163)</option>
                     <option value="2426697">DPD (ID: 2426697)</option>
                     <option value="2435308">TOPTRANS (ID: 2435308)</option>
                     <option value="2435307">Osobně (ID: 2435307)</option>
                 </select>
             </div>
-            <button id="category-btn">🔍 Vybrat kategorii</button>
-            <input type="hidden" id="category-id">
-            <button class="nav-btn" data-step="2">Zpět</button>
-            <button class="nav-btn next-btn" data-step="2" onclick="addProduct()">Přidat produkt</button>
+            <button id="category-btn" class="btn bg-purple-500 text-white px-4 py-2 rounded">🔍 Vybrat kategorii</button>
         </div>
 
-        <!-- Dokončení -->
         <div id="finish-section" class="section hidden">
-            <button id="finish-btn">Odeslat přes WhatsApp</button>
-            <button id="reset-btn">Obnovit data</button>
-            <button onclick="addAnotherProduct()">Přidat další produkt</button>
-            <div id="saved-products"></div>
+            <h2 class="text-xl font-bold mb-4">Dokončení</h2>
+            <button id="finish-btn" class="btn bg-blue-500 text-white px-4 py-2 rounded mr-2">Odeslat přes WhatsApp</button>
+            <button id="reset-btn" class="btn bg-gray-500 text-white px-4 py-2 rounded mr-2">Obnovit data</button>
+            <button onclick="addAnotherProduct()" class="btn bg-green-500 text-white px-4 py-2 rounded">Přidat další produkt</button>
+            <div id="saved-products" class="mt-4"></div>
         </div>
 
-        <!-- Status a progress -->
-        <div id="status">👉 ZAČNI VÝBĚREM OBCHODU</div>
-        <div id="progress-bar" class="hidden">
-            <div id="progress"></div>
+        <div id="status" class="mt-4">👉 ZAČNI VÝBĚREM OBCHODU</div>
+        <div id="product-count-today" class="text-sm text-gray-500 mt-2 text-center"></div>
+        <div id="progress-bar" class="mt-4 hidden">
+            <div id="progress" style="width: 0%;"></div>
         </div>
 
-        <!-- Modální okno pro kategorie -->
-        <div id="category-modal" class="modal hidden">
-            <div class="modal-content">
-                <input type="text" id="category-search" placeholder="Hledej kategorii...">
+        <div id="category-modal" class="modal fixed inset-0 flex items-center justify-center hidden">
+            <div class="modal-content w-11/12 max-w-md">
+                <h2 class="text-xl font-bold mb-4">Vyber kategorii</h2>
+                <input type="text" id="category-search" class="w-full p-2 border rounded mb-4" placeholder="Hledej kategorii...">
                 <div id="category-list"></div>
-                <button id="category-close-btn">Zavřít</button>
+                <button id="category-close-btn" class="btn bg-red-500 text-white px-4 py-2 rounded mt-4">Zavřít</button>
             </div>
         </div>
 
-        <!-- Modální okno pro potvrzení -->
-        <div id="confirm-modal" class="modal hidden">
-            <div class="modal-content">
+        <div id="confirm-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+            <div class="bg-white p-6 rounded shadow-lg">
                 <p class="text-lg mb-4">Opravdu?</p>
                 <div class="flex justify-end gap-4">
                     <button id="confirm-yes" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">ANO</button>
@@ -211,16 +157,15 @@
             </div>
         </div>
 
-        <!-- Modální okno při opuštění stránky -->
-        <div id="exit-modal" class="modal hidden">
-            <div class="modal-content">
-                <p>Chcete před opuštěním stránky vymazat data?</p>
-                <button id="delete-data-btn">Ano, vymazat</button>
-                <button id="close-modal-btn">Ne, pokračovat</button>
+        <div id="exit-modal" class="modal fixed inset-0 flex items-center justify-center hidden">
+            <div class="modal-content w-11/12 max-w-md">
+                <h2 class="text-xl font-bold mb-4">Opravdu chceš opustit stránku?</h2>
+                <p class="mb-4">Data budou vymazána.</p>
+                <button id="delete-data-btn" class="btn bg-red-500 text-white px-4 py-2 rounded mr-2">Vymazat data</button>
+                <button id="close-modal-btn" class="btn bg-gray-500 text-white px-4 py-2 rounded">Zavřít</button>
             </div>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
