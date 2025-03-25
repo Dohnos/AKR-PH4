@@ -15,7 +15,6 @@ const productDetails = document.getElementById("product-details");
 const status = document.getElementById("status");
 const progressBar = document.getElementById("progress-bar");
 const progress = document.getElementById("progress");
-const productsToday = document.getElementById("products-today");
 const shopSelectionSection = document.getElementById("shop-selection");
 const photoSectionSection = document.getElementById("photo-section");
 const finishSection = document.getElementById("finish-section");
@@ -45,8 +44,28 @@ fetch("MapaKat.txt")
     })
     .catch(error => console.error("Chyba při načítání kategorií:", error));
 
+// Počítadlo produktů za dnešní den
+function getTodayDate() {
+    const today = new Date();
+    return today.toISOString().split("T")[0]; // Formát YYYY-MM-DD
+}
+
+function getTodayProductCount() {
+    const today = getTodayDate();
+    const productCounts = JSON.parse(localStorage.getItem("productCounts")) || {};
+    return productCounts[today] || 0;
+}
+
+function incrementTodayProductCount() {
+    const today = getTodayDate();
+    const productCounts = JSON.parse(localStorage.getItem("productCounts")) || {};
+    productCounts[today] = (productCounts[today] || 0) + 1;
+    localStorage.setItem("productCounts", JSON.stringify(productCounts));
+}
+
 function updateStatus(message) {
-    status.textContent = message;
+    const todayCount = getTodayProductCount();
+    status.textContent = `${message} | Produktů dnes: ${todayCount}`;
 }
 
 // Modální okno pro potvrzení
@@ -78,79 +97,8 @@ function updateLocationHistory() {
     }
 }
 
-// Funkce pro aktualizaci počítadla produktů za dnešní den
-function updateProductsToday() {
-    const today = new Date().toISOString().split("T")[0]; // Formát YYYY-MM-DD
-    const key = `productsAdded_${today}`;
-    const count = parseInt(localStorage.getItem(key)) || 0;
-    productsToday.textContent = `Přidáno produktů dnes: ${count}`;
-}
-
-// Funkce pro uložení stavu do localStorage
-function saveState() {
-    const state = {
-        selectedShop,
-        photosCount: photos.length,
-        currentStep: steps.findIndex(step => !step.classList.contains("hidden")),
-        productName: document.getElementById("product-name").value,
-        productPrice: document.getElementById("product-price").value,
-        productLocation: document.getElementById("product-location").value,
-        categoryId: categoryIdInput.value,
-        categoryName: categoryBtn.textContent,
-        shippingMethod: document.getElementById("shipping-method").value
-    };
-    localStorage.setItem("appState", JSON.stringify(state));
-}
-
-// Funkce pro obnovení stavu z localStorage
-function restoreState() {
-    const state = JSON.parse(localStorage.getItem("appState"));
-    if (!state) return;
-
-    selectedShop = state.selectedShop;
-    photos = Array(state.photosCount).fill(null); // Nemůžeme uložit soubory, ale obnovíme počet
-    photoCount.textContent = `${state.photosCount}/3`;
-
-    if (state.selectedShop) {
-        shopSelectionSection.classList.add("hidden");
-        if (state.currentStep >= 1) {
-            photoSectionSection.classList.remove("hidden");
-        }
-    }
-
-    if (state.photosCount === 3) {
-        photoSectionSection.classList.add("hidden");
-        productDetails.classList.remove("hidden");
-        takePhotoBtn.disabled = true;
-        updateLocationHistory();
-    }
-
-    if (state.currentStep >= 2) {
-        document.getElementById("product-name").value = state.productName || "";
-        document.getElementById("product-price").value = state.productPrice || "";
-        document.getElementById("product-location").value = state.productLocation || "";
-        categoryIdInput.value = state.categoryId || "";
-        categoryBtn.textContent = state.categoryName || "🔍 Vybrat kategorii";
-    }
-
-    if (state.currentStep >= 3) {
-        productDetails.classList.add("hidden");
-        finishSection.classList.remove("hidden");
-    }
-
-    if (state.shippingMethod) {
-        document.getElementById("shipping-method").value = state.shippingMethod;
-    }
-
-    showStep(state.currentStep || 0);
-    updateStatus("👉 STAV OBNOVEN Z PŘEDCHOZÍHO KROKU.");
-}
-
 // Inicializace
 updateStatus("👉 ZAČNI VÝBĚREM OBCHODU");
-updateProductsToday();
-productsToday.classList.remove("hidden"); // Zobrazí počítadlo hned od začátku
-restoreState();
 
 // Výběr obchodu
 shopZvoleBtn.addEventListener("click", () => {
@@ -158,8 +106,6 @@ shopZvoleBtn.addEventListener("click", () => {
     shopSelectionSection.classList.add("hidden");
     photoSectionSection.classList.remove("hidden");
     updateStatus("👉 VYBRAL JSI ANTIK ZVOLE. NAFOŤ PRVNÍ FOTKU.");
-    productsToday.classList.remove("hidden");
-    saveState();
 });
 
 shopMoraBtn.addEventListener("click", () => {
@@ -167,8 +113,6 @@ shopMoraBtn.addEventListener("click", () => {
     shopSelectionSection.classList.add("hidden");
     photoSectionSection.classList.remove("hidden");
     updateStatus("👉 VYBRAL JSI ANTIK MORA. NAFOŤ PRVNÍ FOTKU.");
-    productsToday.classList.remove("hidden");
-    saveState();
 });
 
 takePhotoBtn.addEventListener("click", () => {
@@ -191,7 +135,6 @@ photoInput.addEventListener("change", () => {
             takePhotoBtn.disabled = true;
             updateLocationHistory();
         }
-        saveState();
     }
 });
 
@@ -226,7 +169,6 @@ function updateCategoryList(query) {
             categoryBtn.textContent = `Vybrána kategorie: ${category.name}`;
             categoryModal.classList.add("hidden");
             updateStatus("✅ KATEGORIE VYBRÁNA!");
-            saveState();
         });
         categoryList.appendChild(btn);
     });
@@ -239,12 +181,6 @@ function updateCategoryList(query) {
 categoryCloseBtn.addEventListener("click", () => {
     categoryModal.classList.add("hidden");
 });
-
-// Uložení stavu při změně formuláře
-document.getElementById("product-name").addEventListener("input", saveState);
-document.getElementById("product-price").addEventListener("input", saveState);
-document.getElementById("product-location").addEventListener("input", saveState);
-document.getElementById("shipping-method").addEventListener("change", saveState);
 
 // Nahrání souboru na Cloudinary s transformacemi
 async function uploadFile(file) {
@@ -273,7 +209,7 @@ async function addProduct() {
     const price = document.getElementById("product-price").value;
     const categoryId = categoryIdInput.value;
     const location = document.getElementById("product-location").value.trim();
-    const shippingMethod = document.getElementById("shipping-method").value;
+    const shippingMethod = document.getElementById("shipping-method").value; // Nové pole dopravy
 
     if (!name || !price || !categoryId) {
         updateStatus("⚠️ VYPLŇ NÁZEV, CENU A VYBER KATEGORII!");
@@ -304,14 +240,6 @@ async function addProduct() {
             }
         }
 
-        // Zvýšení počítadla produktů za dnešní den
-        const today = new Date().toISOString().split("T")[0];
-        const key = `productsAdded_${today}`;
-        let count = parseInt(localStorage.getItem(key)) || 0;
-        count += 1;
-        localStorage.setItem(key, count);
-        updateProductsToday();
-
         function getRoundedISODate() {
             let date = new Date();
             date.setUTCMinutes(0, 0, 0);
@@ -340,17 +268,20 @@ async function addProduct() {
             duration: 7,
             reexposeType: 0,
             location: JSON.stringify({ countryCode: "CZ", postCode: "789 01", city: "Zvole" }),
-            shippingTemplateId: parseInt(shippingMethod),
+            shippingTemplateId: parseInt(shippingMethod), // Použije vybrané ID dopravy
             shippingPayer: "buyer",
             images: photoUrls.join(" "),
             bestOffer: 1,
             onlyVerifiedBuyersEnabledOverride: 0,
-            attributes: JSON.stringify()
+            attributes: JSON.stringify([])
         };
 
         let products = JSON.parse(localStorage.getItem("products")) || [];
         products.push(product);
         localStorage.setItem("products", JSON.stringify(products));
+
+        // Zvýšení počítadla produktů za dnešní den
+        incrementTodayProductCount();
 
         photos = [];
         photoCount.textContent = "0/3";
@@ -359,14 +290,11 @@ async function addProduct() {
         document.getElementById("product-location").value = "";
         categoryIdInput.value = "";
         categoryBtn.textContent = "🔍 Vybrat kategorii";
-        document.getElementById("shipping-method").value = "2424163";
         productDetails.classList.add("hidden");
         finishSection.classList.remove("hidden");
         takePhotoBtn.disabled = false;
 
         updateStatus("🎉 PRODUKT PŘIDÁN! MŮŽEŠ DOKONČIT NEBO PŘIDAT DALŠÍ.");
-        productsToday.classList.add("hidden"); // Skryje počítadlo ve 4. kroku
-        saveState();
     } catch (error) {
         updateStatus(`❌ CHYBA PŘI ZPRACOVÁNÍ NEBO NAHRÁVÁNÍ FOTEK: ${error.message}`);
     }
@@ -377,8 +305,6 @@ function addAnotherProduct() {
     finishSection.classList.add("hidden");
     photoSectionSection.classList.remove("hidden");
     updateStatus("👉 NAFOŤ FOTKY PRO DALŠÍ PRODUKT.");
-    productsToday.classList.remove("hidden"); // Zobrazí počítadlo při návratu na krok 2
-    saveState();
 }
 
 // Dokončení a odeslání přes WhatsApp
@@ -470,7 +396,6 @@ async function resetStorage() {
     document.getElementById("product-location").value = "";
     categoryIdInput.value = "";
     categoryBtn.textContent = "🔍 Vybrat kategorii";
-    document.getElementById("shipping-method").value = "2424163";
     productDetails.classList.add("hidden");
     photoSectionSection.classList.add("hidden");
     finishSection.classList.add("hidden");
@@ -480,9 +405,6 @@ async function resetStorage() {
     progress.style.width = "0%";
     document.getElementById("saved-products").innerHTML = "";
     updateStatus("🧹 DATA BYLA VYMAZÁNA! ZAČNI ZNOVU.");
-    productsToday.classList.remove("hidden");
-    updateProductsToday();
-    saveState();
 }
 
 // Navigace mezi kroky s validací
@@ -497,14 +419,7 @@ function showStep(stepIndex) {
     steps.forEach((step, index) => {
         step.classList.toggle("hidden", index !== stepIndex);
     });
-    // Zobrazení/skrytí počítadla podle kroku
-    if (stepIndex >= 0 && stepIndex <= 2) {
-        productsToday.classList.remove("hidden");
-    } else {
-        productsToday.classList.add("hidden");
-    }
     updateStatus(`👉 PŘEPNUTO NA KROK ${stepIndex + 1}`);
-    saveState();
 }
 
 document.querySelectorAll(".nav-btn").forEach(btn => {
