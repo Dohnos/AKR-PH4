@@ -60,11 +60,6 @@
                 <div id="location-history" class="mt-2 text-sm text-gray-500"></div>
             </div>
             <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Kategorie:</label>
-                <button id="category-btn" class="btn w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded-lg flex items-center justify-center text-sm">🔍 Vybrat kategorii</button>
-                <input type="hidden" id="category-id">
-            </div>
-            <div class="mb-6">
                 <label for="shipping-method" class="block text-sm font-medium text-gray-700 mb-2">Vyber způsob dopravy:</label>
                 <select id="shipping-method" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                     <option value="2424163" selected>ZÁSILKOVNA (2424163)</option>
@@ -73,21 +68,32 @@
                     <option value="2435307">OSOBNĚ (2435307)</option>
                 </select>
             </div>
-            <div id="progress-bar" class="w-full bg-gray-200 rounded-full h-2.5 hidden">
-                <div id="progress" class="bg-green-500 h-2.5 rounded-full" style="width: 0%;"></div>
-            </div>
-            <button onclick="addProduct()" class="btn w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg mt-6 flex items-center justify-center text-lg">
-                ✅ Přidat produkt
-            </button>
             <div class="absolute top-2 right-2 flex space-x-2">
                 <button class="nav-btn prev-btn" data-step="2">⬅️</button>
                 <button class="nav-btn next-btn" data-step="2">➡️</button>
             </div>
         </section>
 
-        <!-- Krok 3: Dokončení -->
+        <!-- Krok 3: Výběr kategorie -->
+        <section id="category-selection" class="step bg-white p-6 rounded-xl shadow-lg mb-6 hidden relative">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">3️⃣ Vyber kategorii</h2>
+            <button id="category-btn" class="btn w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded-lg flex items-center justify-center text-sm">🔍 Vybrat kategorii</button>
+            <input type="hidden" id="category-id">
+            <div class="absolute top-2 right-2 flex space-x-2">
+                <button class="nav-btn prev-btn" data-step="3">⬅️</button>
+                <button class="nav-btn next-btn" data-step="3">➡️</button>
+            </div>
+        </section>
+
+        <!-- Krok 4: Dokončení -->
         <section id="finish-section" class="step bg-white p-6 rounded-xl shadow-lg hidden relative">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">3️⃣ Dokonči</h2>
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">4️⃣ Dokonči</h2>
+            <div id="progress-bar" class="w-full bg-gray-200 rounded-full h-2.5 mb-4 hidden">
+                <div id="progress" class="bg-green-500 h-2.5 rounded-full" style="width: 0%;"></div>
+            </div>
+            <button onclick="addProduct()" class="btn w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg mb-3 flex items-center justify-center text-lg">
+                ✅ Přidat produkt
+            </button>
             <button id="add-another-btn" onclick="addAnotherProduct()" class="btn w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg mb-3 flex items-center justify-center text-lg">
                 ➕ Přidat další produkt
             </button>
@@ -99,7 +105,7 @@
             </button>
             <div id="saved-products" class="mt-4 text-gray-600 text-sm"></div>
             <div class="absolute top-2 right-2 flex space-x-2">
-                <button class="nav-btn prev-btn" data-step="3">⬅️</button>
+                <button class="nav-btn prev-btn" data-step="4">⬅️</button>
             </div>
         </section>
 
