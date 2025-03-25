@@ -12,6 +12,7 @@ const photoInput = document.getElementById("photo-input");
 const takePhotoBtn = document.getElementById("take-photo-btn");
 const photoCount = document.getElementById("photo-count").querySelector("span");
 const productDetails = document.getElementById("product-details");
+const categorySelection = document.getElementById("category-selection");
 const status = document.getElementById("status");
 const progressBar = document.getElementById("progress-bar");
 const progress = document.getElementById("progress");
@@ -166,14 +167,14 @@ function updateCategoryList(query) {
 
     filteredCategories.forEach(category => {
         const btn = document.createElement("button");
-        btn.textContent = category.name; // Display only the name, as in your example
+        btn.textContent = category.name; // Display only the name
         btn.dataset.id = category.id; // Set the data-id attribute
         btn.classList.add("category-item");
         btn.addEventListener("click", () => {
             categoryIdInput.value = category.id;
             categoryBtn.textContent = `Vybrána kategorie: ${category.name}`;
             categoryModal.classList.add("hidden");
-            updateStatus("✅ KATEGORIE VYBRÁNA!");
+            updateStatus("✅ KATEGORIE VYBRÁNA! POKRAČUJ NA DOKONČENÍ.");
         });
         categoryList.appendChild(btn);
     });
@@ -292,8 +293,8 @@ async function addProduct() {
         document.getElementById("product-location").value = "";
         categoryIdInput.value = "";
         categoryBtn.textContent = "🔍 Vybrat kategorii";
-        productDetails.classList.add("hidden");
-        finishSection.classList.remove("hidden");
+        finishSection.classList.add("hidden");
+        photoSectionSection.classList.remove("hidden");
         takePhotoBtn.disabled = false;
 
         updateStatus("🎉 PRODUKT PŘIDÁN! MŮŽEŠ DOKONČIT NEBO PŘIDAT DALŠÍ.");
@@ -401,6 +402,7 @@ async function resetStorage() {
     categoryBtn.textContent = "🔍 Vybrat kategorii";
     productDetails.classList.add("hidden");
     photoSectionSection.classList.add("hidden");
+    categorySelection.classList.add("hidden");
     finishSection.classList.add("hidden");
     shopSelectionSection.classList.remove("hidden");
     takePhotoBtn.disabled = false;
@@ -416,6 +418,7 @@ const steps = [
     document.getElementById("shop-selection"),
     document.getElementById("photo-section"),
     document.getElementById("product-details"),
+    document.getElementById("category-selection"),
     document.getElementById("finish-section")
 ];
 
@@ -441,9 +444,16 @@ document.querySelectorAll(".nav-btn").forEach(btn => {
             if (currentStep === 2 && isNext) {
                 const name = document.getElementById("product-name").value;
                 const price = document.getElementById("product-price").value;
+                if (!name || !price) {
+                    updateStatus("⚠️ VYPLŇ NÁZEV A CENU NEŽ PŘEJDEŠ DÁL!");
+                    return;
+                }
+            }
+
+            if (currentStep === 3 && isNext) {
                 const categoryId = categoryIdInput.value;
-                if (!name || !price || !categoryId) {
-                    updateStatus("⚠️ VYPLŇ NÁZEV, CENU A KATEGORII NEŽ PŘEJDEŠ DÁL!");
+                if (!categoryId) {
+                    updateStatus("⚠️ VYBER KATEGORII NEŽ PŘEJDEŠ DÁL!");
                     return;
                 }
             }
