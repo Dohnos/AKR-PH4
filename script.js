@@ -345,7 +345,7 @@ async function addProduct() {
             images: photoUrls.join(" "),
             bestOffer: 1,
             onlyVerifiedBuyersEnabledOverride: 0,
-            attributes: JSON.stringify([])
+            attributes: JSON.stringify()
         };
 
         let products = JSON.parse(localStorage.getItem("products")) || [];
