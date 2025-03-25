@@ -41,7 +41,12 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Inputy */
+/* Formulářové prvky */
+.form-group {
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
 input, select {
     transition: all 0.2s ease;
     border: 1px solid #d1d5db; /* Šedá */
@@ -49,6 +54,8 @@ input, select {
     padding: 0.75rem;
     background-color: #ffffff;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 input:focus, select:focus {
@@ -68,6 +75,7 @@ input:focus, select:focus {
     background-color: #e5e7eb; /* Šedá */
     border-radius: 0.5rem;
     overflow: hidden;
+    width: 100%;
 }
 
 /* Sekce (kroky) */
@@ -77,6 +85,8 @@ input:focus, select:focus {
     border-radius: 1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     border: 1px solid #e5e7eb; /* Jemná šedá */
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .step:hover {
@@ -120,6 +130,12 @@ input:focus, select:focus {
 #category-modal .bg-white {
     border-radius: 1rem;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 400px;
+}
+
+#category-list {
+    width: 100%;
 }
 
 #category-list button {
@@ -149,6 +165,8 @@ input:focus, select:focus {
 #confirm-modal .bg-white {
     border-radius: 1rem;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 300px;
 }
 
 #confirm-yes, #confirm-no {
@@ -166,6 +184,8 @@ input:focus, select:focus {
 #exit-modal .bg-white {
     border-radius: 1rem;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 300px;
 }
 
 /* Vylepšení vzhledu sekcí */
@@ -235,4 +255,51 @@ input::placeholder, select {
 
 .text-gray-800 {
     color: #1f2937 !important;
+}
+
+/* Responzivní úpravy */
+@media (max-width: 640px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .step {
+        padding: 1rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    input, select {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    #category-modal .bg-white,
+    #exit-modal .bg-white,
+    #confirm-modal .bg-white {
+        width: 95%;
+        padding: 1rem;
+    }
+
+    #category-list button {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .status {
+        padding: 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    #products-today {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+    }
 }
