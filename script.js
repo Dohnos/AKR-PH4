@@ -220,6 +220,7 @@ function updateCategoryList(query) {
     btn.style.border = "none";
     btn.style.background = "none";
     btn.style.padding = "0.75rem";
+    btn.style.fontSize = "1.2rem";
     btn.onmouseover = () => (btn.style.backgroundColor = "#f2f2f2");
     btn.onmouseout = () => (btn.style.backgroundColor = "");
     btn.onclick = () => {
