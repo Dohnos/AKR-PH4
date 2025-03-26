@@ -52,6 +52,9 @@ const shippingMethodSelect = document.getElementById("shippingMethod");
 
 /* ---------------------------------
    Načtení kategorií (MapaKat.txt)
+   - pokud v Android prohlížeči fetch
+     selže, kategorie se nenačtou,
+     ale zbytek poběží normálně.
 -----------------------------------*/
 fetch("MapaKat.txt")
   .then((response) => response.text())
@@ -68,7 +71,8 @@ fetch("MapaKat.txt")
       .filter((cat) => cat);
   })
   .catch((err) => {
-    console.error("Chyba při načítání kategorií:", err);
+    console.warn("Chyba při načítání kategorií:", err);
+    // Neděláme nic fatálního – jen varování
   });
 
 /* ---------------------------------
@@ -76,7 +80,6 @@ fetch("MapaKat.txt")
 -----------------------------------*/
 function updateStatus(message) {
   statusElem.textContent = message;
-  // Kdykoli změníme status, zaktualizujeme i "dnes přidáno"
   updateDailyCountDisplay();
 }
 
@@ -116,13 +119,71 @@ function updateLocationHistory() {
   }
 }
 
-// Zobrazení Bulma modálu
+// Otevření a zavření Bulma modálu
 function openModal(modalElem) {
   modalElem.classList.add("is-active");
 }
-// Zavření Bulma modálu
 function closeModal(modalElem) {
   modalElem.classList.remove("is-active");
+}
+
+/* ---------------------------------
+   Funkce pro lokální kompresi fotky
+-----------------------------------*/
+function compressImage(file, quality = 0.7, maxWidth = 1200, maxHeight = 1200) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = (e) => {
+      const img = new Image();
+      img.src = e.target.result;
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        let width = img.width;
+        let height = img.height;
+
+        // Zmenšíme při překročení maxWidth / maxHeight
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height *= maxWidth / width));
+            width = maxWidth;
+          } else {
+            width = Math.round((width *= maxHeight / height));
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Komprese do JPEG (quality = 0.7 je cca 70 %)
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              return reject(new Error("Komprese se nezdařila."));
+            }
+            // Vytvoříme nový File, aby se dal dál nahrát
+            const compressedFile = new File([blob], file.name, {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+
+      img.onerror = () => reject(new Error("Chyba při načítání obrázku."));
+    };
+
+    reader.onerror = (err) => reject(err);
+  });
 }
 
 /* ---------------------------------
@@ -149,7 +210,7 @@ shopMoraBtn.addEventListener("click", () => {
 });
 
 /* ---------------------------------
-   Focení 3 fotek
+   Focení 3 fotek (už s lokální kompresí)
 -----------------------------------*/
 takePhotoBtn.addEventListener("click", () => {
   if (photos.length < 3) {
@@ -159,23 +220,40 @@ takePhotoBtn.addEventListener("click", () => {
   }
 });
 
-photoInput.addEventListener("change", () => {
+// Jakmile uživatel vybere soubory
+photoInput.addEventListener("change", async () => {
   if (photoInput.files.length) {
-    photos.push(photoInput.files[0]);
-    photoCountElem.textContent = `${photos.length}/3`;
+    // Projdeme všechny vybrané soubory (u mobilu často jen 1)
+    for (let i = 0; i < photoInput.files.length; i++) {
+      const originalFile = photoInput.files[i];
+      try {
+        // Lokální komprese
+        const compressed = await compressImage(originalFile, 0.7);
+        photos.push(compressed);
+        updateStatus(`📸 Zkomprimována fotka č. ${i + 1}.`);
+      } catch (err) {
+        updateStatus(`⚠️ Chyba komprese: ${err.message}`);
+      }
+    }
+
+    // Vynulujeme input, aby šlo vybrat stejnou fotku znovu
     photoInput.value = "";
-    updateStatus(
-      `📸 Nafocena fotka ${photos.length}/3. ${
-        photos.length < 3
-          ? "Pokračuj další fotkou."
-          : "Vyplň název a cenu."
-      }`
-    );
+
+    // Aktualizace počítadla fotek
+    photoCountElem.textContent = `${photos.length}/3`;
+
+    // Jakmile máme 3 fotky, automaticky přejít na krok 2 + zpráva
     if (photos.length === 3) {
+      updateStatus("✅ Fotky byly úspěšně nahrány a zkomprimovány. Teď detail.");
+      // Skryjeme focení a otevřeme detaily
       photoSectionSection.classList.add("is-hidden");
       productDetailsSection.classList.remove("is-hidden");
       takePhotoBtn.disabled = true;
       updateLocationHistory();
+    } else {
+      updateStatus(
+        `📸 Nafocena (zkomprimována) fotka ${photos.length}/3. Pokračuj další.`
+      );
     }
   }
 });
@@ -238,10 +316,9 @@ categoryCloseBtn.addEventListener("click", () => {
 });
 
 /* ---------------------------------
-   Nahrávání: Unikátní názvy fotek i excel
+   Nahrávání: Unikátní názvy fotek + Excel
 -----------------------------------*/
 async function uploadFile(file, indexForImages = 1) {
-  // Pro fotky budeme mít indexForImages = i+1
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
@@ -253,15 +330,15 @@ async function uploadFile(file, indexForImages = 1) {
   const year = String(now.getFullYear());
   const hours = String(now.getHours()).padStart(2, "0");
   const minutes = String(now.getMinutes()).padStart(2, "0");
-  const dateStr = day + month + year; // "25032025"
-  const timeStr = hours + minutes;    // "2014"
+  const dateStr = day + month + year; // "26032025"
+  const timeStr = hours + minutes;    // "1042"
 
   // Náhodný sufix (4 znaky)
   const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
 
   if (file.type.includes("image")) {
     formData.append("folder", "media_library");
-    // Např.: IMAGE_25032025_2014_1_ABCD
+    // Např.: IMAGE_25032025_1042_1_ABCD
     const publicId = `IMAGE_${dateStr}_${timeStr}_${indexForImages}_${randomSuffix}`;
     formData.append("public_id", publicId);
 
@@ -295,9 +372,7 @@ async function addProduct() {
   const shippingId = shippingMethodSelect.value;
 
   if (!name || !price || !categoryId || !shippingId) {
-    updateStatus(
-      "⚠️ Vyplň název, cenu, kategorii a dopravu!"
-    );
+    updateStatus("⚠️ Vyplň název, cenu, kategorii a dopravu!");
     return;
   }
 
@@ -309,7 +384,6 @@ async function addProduct() {
     const photoUrls = [];
     for (let i = 0; i < photos.length; i++) {
       updateStatus(`🖼️ Nahrávám obrázek ${i + 1}/3...`);
-      // Předáme index fotky pro unikátní název
       const url = await uploadFile(photos[i], i + 1);
       photoUrls.push(url);
       const percent = Math.round(((i + 1) / photos.length) * 100);
@@ -317,7 +391,7 @@ async function addProduct() {
       updateStatus(`📤 Nahrán obrázek ${i + 1}/3...`);
     }
 
-    // Uložení umístění do localStorage
+    // Uložení umístění do localStorage (kvůli historii)
     if (location) {
       let locationHistory = JSON.parse(localStorage.getItem("locationHistory")) || [];
       if (!locationHistory.includes(location)) {
@@ -377,7 +451,7 @@ async function addProduct() {
     products.push(product);
     localStorage.setItem("products", JSON.stringify(products));
 
-    // Reset
+    // Reset fotek a formuláře
     photos = [];
     photoCountElem.textContent = "0/3";
     document.getElementById("product-name").value = "";
@@ -401,7 +475,6 @@ async function addProduct() {
    Přidat další produkt
 -----------------------------------*/
 function addAnotherProduct() {
-  // Reset progress bar pro nový produkt
   progressBar.value = 0;
   progressBar.classList.add("is-hidden");
 
@@ -491,7 +564,7 @@ async function finish() {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     });
 
-    // Vytvoříme jméno souboru: products_25032025_[Z].xlsx
+    // Vytvoříme jméno souboru: products_26032025_[Z].xlsx
     const dateNow = new Date();
     const dd = String(dateNow.getDate()).padStart(2, "0");
     const mm = String(dateNow.getMonth() + 1).padStart(2, "0");
@@ -505,9 +578,6 @@ async function finish() {
 
     // Pro Excel: doplníme i unikátní sufix do public_id
     const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
-
-    // Upload: voláme stejnou funkci, ale 2. argument nepotřebujeme
-    // because we won't pass an index for images, just do:
     const excelUrl = await uploadFileForExcel(file, randomSuffix);
 
     // Zkopírování odkazu do schránky
@@ -546,7 +616,7 @@ async function uploadFileForExcel(file, randomSuffix) {
   const yyyy = String(now.getFullYear());
   const dateStr = dd + mm + yyyy; 
 
-  // Např. products_25032025_[Z]_ABCD
+  // Např. products_26032025_[Z]_ABCD
   const publicId = `products_${dateStr}_[${selectedShop}]_${randomSuffix}`;
 
   formData.append("folder", "excel_files");
@@ -595,7 +665,7 @@ async function resetStorage() {
 }
 
 /* ---------------------------------
-   Navigace mezi kroky
+   Navigace mezi kroky (Zpět / Dál)
 -----------------------------------*/
 const steps = [
   shopSelectionSection,
@@ -611,21 +681,19 @@ document.querySelectorAll(".nav-btn").forEach((btn) => {
     const newStep = isNext ? currentStep + 1 : currentStep - 1;
 
     if (newStep >= 0 && newStep < steps.length) {
-      // Kontrola 3 fotek
+      // Kontrola 3 fotek při přechodu z kroku 1
       if (currentStep === 1 && isNext && photos.length < 3) {
         updateStatus("⚠️ Musíš nafotit 3 fotky, než přejdeš dál!");
         return;
       }
-      // Kontrola vyplnění
+      // Kontrola vyplnění při přechodu z kroku 2
       if (currentStep === 2 && isNext) {
         const name = document.getElementById("product-name").value.trim();
         const price = document.getElementById("product-price").value.trim();
         const categoryId = categoryIdInput.value.trim();
         const shippingId = shippingMethodSelect.value;
         if (!name || !price || !categoryId || !shippingId) {
-          updateStatus(
-            "⚠️ Vyplň název, cenu, kategorii a dopravu, než přejdeš dál!"
-          );
+          updateStatus("⚠️ Vyplň název, cenu, kategorii a dopravu, než přejdeš dál!");
           return;
         }
       }
