@@ -209,6 +209,12 @@ shopMoraBtn.addEventListener("click", () => {
   updateStatus("👉 Vybral jsi Antik Mora. Nahoď první fotku!");
 });
 
+shopZmBtn.addEventListener("click", () => {
+  selectedShop = "ZM"; // obch. param
+  shopSelectionSection.classList.add("is-hidden");
+  photoSectionSection.classList.remove("is-hidden");
+  updateStatus("👉 Vybral jsi Antik Společně. Nahoď první fotku!");
+});
 /* ---------------------------------
    Focení 3 fotek (už s lokální kompresí)
 -----------------------------------*/
