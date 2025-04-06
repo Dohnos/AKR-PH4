@@ -16,6 +16,7 @@ let categories = [];
 -----------------------------------*/
 const shopZvoleBtn = document.getElementById("shop-zvole");
 const shopMoraBtn = document.getElementById("shop-mora");
+const shopZmBtn = document.getElementById("shop-zm");
 const photoInput = document.getElementById("photo-input");
 const takePhotoBtn = document.getElementById("take-photo-btn");
 const photoCountElem = document.getElementById("photo-count");
@@ -207,6 +208,13 @@ shopMoraBtn.addEventListener("click", () => {
   shopSelectionSection.classList.add("is-hidden");
   photoSectionSection.classList.remove("is-hidden");
   updateStatus("👉 Vybral jsi Antik Mora. Nahoď první fotku!");
+});
+
+shopZmBtn.addEventListener("click", () => {
+  selectedShop = "ZM";
+  shopSelectionSection.classList.add("is-hidden");
+  photoSectionSection.classList.remove("is-hidden");
+  updateStatus("👉 Vybral jsi Antik Společně. Nahoď první fotku!");
 });
 
 /* ---------------------------------
